@@ -1,0 +1,112 @@
+{
+  "projectId": "1782699817234-db06888d",
+  "projectName": "Sprint Check",
+  "sourceUrl": "http://localhost:4000/",
+  "outputType": "static-html",
+  "outputLabel": "Static HTML",
+  "mode": "Mirror Website",
+  "status": "Completed",
+  "createdAt": "2026-06-29T02:23:37.357Z",
+  "pagesCount": 1,
+  "imagesCount": 0,
+  "cssCount": 1,
+  "jsCount": 1,
+  "cssFilesCount": 1,
+  "jsFilesCount": 1,
+  "fontsCount": 0,
+  "videosCount": 0,
+  "iconsCount": 0,
+  "svgCount": 0,
+  "audioCount": 0,
+  "documentsCount": 0,
+  "manifestsCount": 0,
+  "dataCount": 0,
+  "detectedTechnologies": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+  ],
+  "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+  ],
+  "detectedComponents": [
+    {
+      "name": "Header",
+      "type": "header",
+      "confidence": 99,
+      "count": 1
+    },
+    {
+      "name": "Hero",
+      "type": "hero",
+      "confidence": 96,
+      "count": 2
+    },
+    {
+      "name": "Cards",
+      "type": "cards",
+      "confidence": 93,
+      "count": 39
+    },
+    {
+      "name": "Footer",
+      "type": "footer",
+      "confidence": 99,
+      "count": 1
+    },
+    {
+      "name": "Sidebar",
+      "type": "sidebar",
+      "confidence": 92,
+      "count": 2
+    }
+  ],
+  "detectedRoutes": [
+    "/"
+  ],
+  "pagesFound": [
+    {
+      "title": "Website Rebuilder AI Pro",
+      "path": "/",
+      "status": 200,
+      "url": "http://localhost:4000/"
+    }
+  ],
+  "responsiveStatus": "Responsive",
+  "responsive": true,
+  "seoScore": 90,
+  "accessibilityScore": 85,
+  "performanceScore": 98,
+  "estimatedSimilarity": 98,
+  "projectSize": 75245,
+  "projectSizeFormatted": "73.5 KB",
+  "fileCount": 10,
+  "componentsCreated": 0,
+  "externalCdnAssets": 0,
+  "assetsDownloaded": 2,
+  "outputStructure": [
+    ".htaccess",
+    "README.md",
+    "REPORT.md",
+    "index.html",
+    "report.json",
+    "robots.txt",
+    "script.js",
+    "sitemap.xml",
+    "style.css",
+    "website-report.json"
+  ],
+  "failedAssets": [],
+  "inspector": {
+    "projectSize": 75245,
+    "projectSizeFormatted": "73.5 KB",
+    "fileCount": 10,
+    "pagesGenerated": 1,
+    "componentsGenerated": 0,
+    "assetsDownloaded": 2,
+    "zipSize": 20476,
+    "zipSizeFormatted": "20.0 KB"
+  }
+}

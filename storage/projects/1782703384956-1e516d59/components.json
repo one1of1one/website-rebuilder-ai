@@ -1,0 +1,73 @@
+{
+  "components": [
+    {
+      "name": "Header",
+      "type": "header",
+      "confidence": 99,
+      "count": 1
+    },
+    {
+      "name": "Hero",
+      "type": "hero",
+      "confidence": 96,
+      "count": 2
+    },
+    {
+      "name": "Cards",
+      "type": "cards",
+      "confidence": 93,
+      "count": 39
+    },
+    {
+      "name": "Footer",
+      "type": "footer",
+      "confidence": 99,
+      "count": 1
+    },
+    {
+      "name": "Sidebar",
+      "type": "sidebar",
+      "confidence": 92,
+      "count": 2
+    }
+  ],
+  "componentMap": [
+    {
+      "name": "Header",
+      "type": "header",
+      "confidence": 99,
+      "file": "components\\header.html"
+    },
+    {
+      "name": "Hero",
+      "type": "hero",
+      "confidence": 96,
+      "file": "components\\hero.html"
+    },
+    {
+      "name": "Cards",
+      "type": "cards",
+      "confidence": 93,
+      "file": "components\\cards.html"
+    },
+    {
+      "name": "Footer",
+      "type": "footer",
+      "confidence": 99,
+      "file": "components\\footer.html"
+    },
+    {
+      "name": "Sidebar",
+      "type": "sidebar",
+      "confidence": 92,
+      "file": "components\\sidebar.html"
+    }
+  ],
+  "generatedFiles": [
+    "components\\header.html",
+    "components\\hero.html",
+    "components\\cards.html",
+    "components\\footer.html",
+    "components\\sidebar.html"
+  ]
+}

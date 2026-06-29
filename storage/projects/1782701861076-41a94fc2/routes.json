@@ -1,0 +1,13 @@
+{
+  "routes": [
+    "/"
+  ],
+  "pagesFound": [
+    {
+      "title": "Website Rebuilder AI Pro",
+      "path": "/",
+      "status": 200,
+      "url": "http://localhost:4000/"
+    }
+  ]
+}

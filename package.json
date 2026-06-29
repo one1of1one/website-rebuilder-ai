@@ -1,0 +1,24 @@
+{
+  "name": "website-rebuilder-ai-pro",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Analyze websites and generate downloadable project scaffolds in eight formats.",
+  "main": "backend/server.js",
+  "scripts": {
+    "dev": "node --watch backend/server.js",
+    "start": "node backend/server.js",
+    "test": "node tests/run-tests.js",
+    "test:analyzer": "node tests/analyzer.test.js",
+    "test:generator": "node tests/generator.test.js",
+    "verify:endpoints": "node scripts/verify-endpoints.js",
+    "test:api": "node scripts/verify-endpoints.js"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "axios": "^1.7.9",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "fs-extra": "^11.2.0"
+  }
+}

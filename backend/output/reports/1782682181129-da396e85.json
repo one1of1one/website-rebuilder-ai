@@ -1,0 +1,29 @@
+{
+  "projectId": "1782682181129-da396e85",
+  "projectName": "ptt",
+  "sourceUrl": "https://www.pttavm.com/aracim360/km-sorgula",
+  "outputType": "static-html",
+  "outputLabel": "Static HTML",
+  "mode": "Mirror Website",
+  "status": "Completed",
+  "createdAt": "2026-06-28T21:31:43.627Z",
+  "pagesCount": 1,
+  "imagesCount": 14,
+  "cssFilesCount": 5,
+  "jsFilesCount": 19,
+  "fontsCount": 0,
+  "videosCount": 0,
+  "responsive": true,
+  "seoScore": 85,
+  "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "Next.js",
+    "React",
+    "Cloudflare"
+  ],
+  "componentsCreated": 0,
+  "detectedComponents": [],
+  "estimatedSimilarity": 98
+}

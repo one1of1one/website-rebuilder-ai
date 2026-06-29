@@ -1,0 +1,116 @@
+{
+  "projectId": "1782697770655-07fdab3a",
+  "projectName": "Migrate Test",
+  "sourceUrl": "http://localhost:4000/",
+  "outputType": "laravel",
+  "outputLabel": "Laravel",
+  "mode": "Framework Migration",
+  "status": "Completed",
+  "createdAt": "2026-06-29T01:49:30.785Z",
+  "pagesCount": 1,
+  "imagesCount": 0,
+  "cssCount": 1,
+  "jsCount": 1,
+  "cssFilesCount": 1,
+  "jsFilesCount": 1,
+  "fontsCount": 0,
+  "videosCount": 0,
+  "iconsCount": 0,
+  "svgCount": 0,
+  "audioCount": 0,
+  "documentsCount": 0,
+  "manifestsCount": 0,
+  "dataCount": 0,
+  "detectedTechnologies": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+  ],
+  "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+  ],
+  "detectedComponents": [
+    {
+      "name": "Header",
+      "type": "header",
+      "confidence": 99,
+      "count": 1
+    },
+    {
+      "name": "Hero",
+      "type": "hero",
+      "confidence": 96,
+      "count": 2
+    },
+    {
+      "name": "Cards",
+      "type": "cards",
+      "confidence": 93,
+      "count": 39
+    },
+    {
+      "name": "Footer",
+      "type": "footer",
+      "confidence": 99,
+      "count": 1
+    },
+    {
+      "name": "Sidebar",
+      "type": "sidebar",
+      "confidence": 92,
+      "count": 2
+    }
+  ],
+  "detectedRoutes": [
+    "/"
+  ],
+  "pagesFound": [
+    {
+      "title": "Website Rebuilder AI Pro",
+      "path": "/",
+      "status": 200,
+      "url": "http://localhost:4000/"
+    }
+  ],
+  "responsiveStatus": "Responsive",
+  "responsive": true,
+  "seoScore": 90,
+  "accessibilityScore": 85,
+  "performanceScore": 98,
+  "estimatedSimilarity": 86,
+  "projectSize": 78769,
+  "projectSizeFormatted": "76.9 KB",
+  "fileCount": 14,
+  "componentsCreated": 3,
+  "externalCdnAssets": 0,
+  "assetsDownloaded": 2,
+  "outputStructure": [
+    "README.md",
+    "REPORT.md",
+    "public/.htaccess",
+    "public/assets/css/style-230b62770e.css",
+    "public/assets/js/app-8b129054ec.js",
+    "public/robots.txt",
+    "public/sitemap.xml",
+    "report.json",
+    "resources/views/components/cards.blade.php",
+    "resources/views/components/footer.blade.php",
+    "resources/views/components/hero.blade.php",
+    "resources/views/home.blade.php",
+    "routes/web.php",
+    "website-report.json"
+  ],
+  "failedAssets": [],
+  "inspector": {
+    "projectSize": 78769,
+    "projectSizeFormatted": "76.9 KB",
+    "fileCount": 14,
+    "pagesGenerated": 1,
+    "componentsGenerated": 3,
+    "assetsDownloaded": 2,
+    "zipSize": 23651,
+    "zipSizeFormatted": "23.1 KB"
+  }
+}

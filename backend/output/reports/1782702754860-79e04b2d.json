@@ -1,0 +1,335 @@
+{
+  "projectId": "1782702754860-79e04b2d",
+  "projectName": "Endpoint Verification",
+  "sourceUrl": "http://127.0.0.1:4000/",
+  "outputType": "static-html",
+  "outputLabel": "Static HTML",
+  "mode": "Mirror Website",
+  "status": "Completed",
+  "createdAt": "2026-06-29T03:12:35.067Z",
+  "pagesCount": 1,
+  "imagesCount": 0,
+  "cssCount": 1,
+  "jsCount": 1,
+  "cssFilesCount": 1,
+  "jsFilesCount": 1,
+  "fontsCount": 0,
+  "videosCount": 0,
+  "iconsCount": 0,
+  "svgCount": 0,
+  "audioCount": 0,
+  "documentsCount": 0,
+  "manifestsCount": 0,
+  "dataCount": 0,
+  "detectedTechnologies": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+  ],
+  "technologies": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+  ],
+  "detectedComponents": [
+    {
+      "name": "Header",
+      "type": "header",
+      "confidence": 99,
+      "count": 1
+    },
+    {
+      "name": "Hero",
+      "type": "hero",
+      "confidence": 96,
+      "count": 2
+    },
+    {
+      "name": "Cards",
+      "type": "cards",
+      "confidence": 93,
+      "count": 39
+    },
+    {
+      "name": "Footer",
+      "type": "footer",
+      "confidence": 99,
+      "count": 1
+    },
+    {
+      "name": "Sidebar",
+      "type": "sidebar",
+      "confidence": 92,
+      "count": 2
+    }
+  ],
+  "componentCount": 5,
+  "detectedRoutes": [
+    "/"
+  ],
+  "layoutType": "dashboard",
+  "layoutPattern": "sidebar",
+  "layoutSignals": {
+    "hasSidebar": true,
+    "hasHero": true,
+    "hasCards": true,
+    "hasGrid": true,
+    "hasDashboardSignals": true,
+    "hasBlogSignals": false,
+    "hasEcommerceSignals": false,
+    "hasDocsSignals": true,
+    "hasPortfolioSignals": true
+  },
+  "domAnalysis": {
+    "semanticSections": [
+      {
+        "name": "header",
+        "count": 1,
+        "confidence": 98
+      },
+      {
+        "name": "main",
+        "count": 1,
+        "confidence": 98
+      },
+      {
+        "name": "footer",
+        "count": 1,
+        "confidence": 98
+      },
+      {
+        "name": "section",
+        "count": 16,
+        "confidence": 83
+      },
+      {
+        "name": "aside",
+        "count": 2,
+        "confidence": 89
+      }
+    ],
+    "repeatedBlocks": [
+      {
+        "signature": "span::strong::::",
+        "count": 5,
+        "confidence": 85
+      },
+      {
+        "signature": "span::i::::",
+        "count": 2,
+        "confidence": 76
+      },
+      {
+        "signature": "section::div::::",
+        "count": 2,
+        "confidence": 76
+      },
+      {
+        "signature": "div::span::eyebrow::",
+        "count": 3,
+        "confidence": 79
+      },
+      {
+        "signature": "div::p::::",
+        "count": 6,
+        "confidence": 88
+      },
+      {
+        "signature": "div::span::::",
+        "count": 6,
+        "confidence": 88
+      },
+      {
+        "signature": "div::strong::::",
+        "count": 2,
+        "confidence": 76
+      },
+      {
+        "signature": "div::span::step-number::",
+        "count": 5,
+        "confidence": 85
+      },
+      {
+        "signature": "div::div::::",
+        "count": 17,
+        "confidence": 90
+      },
+      {
+        "signature": "div::h2::::",
+        "count": 6,
+        "confidence": 88
+      },
+      {
+        "signature": "div::label::::",
+        "count": 2,
+        "confidence": 76
+      },
+      {
+        "signature": "label::span::::",
+        "count": 23,
+        "confidence": 90
+      },
+      {
+        "signature": "label::input::::",
+        "count": 39,
+        "confidence": 90
+      },
+      {
+        "signature": "form::div::section-heading format-heading::",
+        "count": 2,
+        "confidence": 76
+      },
+      {
+        "signature": "label::span::mode-icon::",
+        "count": 4,
+        "confidence": 82
+      },
+      {
+        "signature": "span::small::::",
+        "count": 4,
+        "confidence": 82
+      },
+      {
+        "signature": "div::label::mode-card::",
+        "count": 3,
+        "confidence": 79
+      },
+      {
+        "signature": "div::label::format-card selected::",
+        "count": 2,
+        "confidence": 76
+      },
+      {
+        "signature": "label::span::format-icon::",
+        "count": 17,
+        "confidence": 90
+      },
+      {
+        "signature": "label::strong::::",
+        "count": 17,
+        "confidence": 90
+      }
+    ],
+    "forms": {
+      "count": 1,
+      "confidence": 84
+    },
+    "buttons": {
+      "count": 6,
+      "confidence": 84
+    },
+    "cards": {
+      "count": 39,
+      "confidence": 90
+    },
+    "tables": {
+      "count": 1,
+      "confidence": 87
+    },
+    "totalSections": 5
+  },
+  "pagesFound": [
+    {
+      "title": "Website Rebuilder AI Pro",
+      "path": "/",
+      "status": 200,
+      "url": "http://127.0.0.1:4000/"
+    }
+  ],
+  "responsiveStatus": "Responsive",
+  "responsive": true,
+  "seoScore": 72,
+  "seoDetails": {
+    "title": "Website Rebuilder AI Pro",
+    "description": "Rebuild public websites into clean, downloadable project scaffolds.",
+    "h1Count": 1,
+    "headingOrderIssues": 0,
+    "canonical": "",
+    "ogTags": 0,
+    "twitterTags": 0,
+    "schemaCount": 0,
+    "robotsHint": "",
+    "sitemapHint": "present",
+    "score": 72,
+    "issues": {
+      "missingTitle": false,
+      "missingDescription": false,
+      "missingCanonical": true,
+      "headingOrderIssues": 0
+    },
+    "sourceUrl": "http://127.0.0.1:4000/"
+  },
+  "accessibilityScore": 87,
+  "accessibilityDetails": {
+    "images": 0,
+    "missingAlt": 0,
+    "buttonsWithoutLabels": 0,
+    "formsWithoutLabels": 1,
+    "headingOrderIssues": 0,
+    "hasLang": true,
+    "ariaHints": 0,
+    "score": 87,
+    "issues": {
+      "missingAlt": 0,
+      "buttonsWithoutLabels": 0,
+      "formsWithoutLabels": 1,
+      "headingOrderIssues": 0,
+      "missingLang": false
+    }
+  },
+  "performanceScore": 95,
+  "performanceDetails": {
+    "assetCounts": {
+      "images": 0,
+      "css": 1,
+      "js": 1,
+      "fonts": 0,
+      "videos": 0,
+      "svg": 0,
+      "icons": 0,
+      "externalCdnAssets": 0
+    },
+    "imageCount": 0,
+    "blockingCssCount": 1,
+    "blockingJsCount": 1,
+    "externalScriptCount": 0,
+    "largeHtmlEstimate": "small",
+    "htmlLength": 21796,
+    "score": 95,
+    "estimatedImpact": {
+      "cssBlocking": 1,
+      "jsBlocking": 1,
+      "largeHtml": "small"
+    }
+  },
+  "estimatedSimilarity": 98,
+  "projectSize": 70240,
+  "projectSizeFormatted": "68.6 KB",
+  "fileCount": 7,
+  "componentsCreated": 0,
+  "externalCdnAssets": 0,
+  "assetsDownloaded": 2,
+  "outputStructure": [
+    ".htaccess",
+    "README.md",
+    "REPORT.md",
+    "index.html",
+    "report.json",
+    "robots.txt",
+    "script.js",
+    "sitemap.xml",
+    "style.css",
+    "website-report.json"
+  ],
+  "failedAssets": [],
+  "inspector": {
+    "projectSize": 70240,
+    "projectSizeFormatted": "68.6 KB",
+    "fileCount": 7,
+    "pagesGenerated": 1,
+    "componentsGenerated": 0,
+    "assetsDownloaded": 2,
+    "zipSize": 22335,
+    "zipSizeFormatted": "21.8 KB"
+  }
+}

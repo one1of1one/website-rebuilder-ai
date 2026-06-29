@@ -1,0 +1,36 @@
+{
+  "components": [
+    {
+      "name": "Header",
+      "type": "header",
+      "confidence": 99,
+      "count": 1
+    },
+    {
+      "name": "Hero",
+      "type": "hero",
+      "confidence": 96,
+      "count": 2
+    },
+    {
+      "name": "Cards",
+      "type": "cards",
+      "confidence": 93,
+      "count": 39
+    },
+    {
+      "name": "Footer",
+      "type": "footer",
+      "confidence": 99,
+      "count": 1
+    },
+    {
+      "name": "Sidebar",
+      "type": "sidebar",
+      "confidence": 92,
+      "count": 2
+    }
+  ],
+  "componentMap": [],
+  "generatedFiles": []
+}

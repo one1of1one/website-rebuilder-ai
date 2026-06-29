@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Rebuild public websites into clean, downloadable project scaffolds."
+    />
+    <title>Website Rebuilder AI Pro</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark">W</span>
+        <span>Website Rebuilder <strong>AI Pro</strong></span>
+      </a>
+      <span class="status-pill"><i></i> Engine ready</span>
+    </header>
+
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <span class="eyebrow">Professional website extraction</span>
+          <h1>Rebuild any website into a clean project.</h1>
+          <p>
+            Analyze the page, collect its assets, detect its technology, and
+            export a ready-to-extend project scaffold.
+          </p>
+        </div>
+        <div class="hero-stat">
+          <span>OUTPUT FORMATS</span>
+          <strong>11</strong>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <form id="rebuild-form" class="builder-panel">
+          <div class="section-heading">
+            <span class="step-number">01</span>
+            <div>
+              <h2>Project details</h2>
+              <p>Choose a source and name your generated project.</p>
+            </div>
+          </div>
+
+          <div class="input-grid">
+            <label>
+              <span>Target URL</span>
+              <span class="url-control">
+                <input
+                  name="url"
+                  type="url"
+                  placeholder="https://example.com"
+                  autocomplete="url"
+                  required
+                />
+                <button id="analyze-button" type="button">Analyze URL</button>
+              </span>
+            </label>
+            <label>
+              <span>Project Name</span>
+              <input
+                name="projectName"
+                type="text"
+                placeholder="My Rebuilt Website"
+                maxlength="80"
+                required
+              />
+            </label>
+          </div>
+
+          <div class="section-heading format-heading">
+            <span class="step-number">02</span>
+            <div>
+              <h2>Rebuild mode</h2>
+              <p>Choose exact mirroring or rule-based source reconstruction.</p>
+            </div>
+          </div>
+
+          <div class="mode-grid" id="mode-grid">
+            <label class="mode-card selected">
+              <input type="radio" name="rebuildMode" value="mirror" checked />
+              <span class="mode-icon">M</span>
+              <span>
+                <strong>Mirror Website</strong>
+                <small>Download exactly as deployed.</small>
+              </span>
+            </label>
+            <label class="mode-card">
+              <input type="radio" name="rebuildMode" value="ai-rebuild" />
+              <span class="mode-icon">AI</span>
+              <span>
+                <strong>AI Rebuild Project</strong>
+                <small>Analyze, refactor and generate developer-friendly source.</small>
+              </span>
+            </label>
+            <label class="mode-card">
+              <input
+                type="radio"
+                name="rebuildMode"
+                value="framework-migration"
+              />
+              <span class="mode-icon">FM</span>
+              <span>
+                <strong>Framework Migration</strong>
+                <small>Convert the site into a different framework scaffold.</small>
+              </span>
+            </label>
+            <label class="mode-card">
+              <input type="radio" name="rebuildMode" value="ai-upgrade" />
+              <span class="mode-icon">UP</span>
+              <span>
+                <strong>AI Upgrade</strong>
+                <small>Modernize semantics, layout, SEO and accessibility.</small>
+              </span>
+            </label>
+          </div>
+
+          <div class="section-heading format-heading">
+            <span class="step-number">03</span>
+            <div>
+              <h2>Output format</h2>
+              <p>Select the project scaffold to generate.</p>
+            </div>
+          </div>
+
+          <div class="format-grid" id="format-grid">
+            <label class="format-card selected">
+              <input type="radio" name="outputType" value="static-html" checked />
+              <span class="format-icon">&lt;/&gt;</span>
+              <strong>Static HTML</strong>
+              <small>Portable web files</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="outputType" value="php" />
+              <span class="format-icon">php</span>
+              <strong>PHP</strong>
+              <small>Simple PHP project</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="outputType" value="laravel" />
+              <span class="format-icon">Lv</span>
+              <strong>Laravel</strong>
+              <small>Laravel scaffold</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="outputType" value="wordpress" />
+              <span class="format-icon">W</span>
+              <strong>WordPress Theme</strong>
+              <small>Installable theme base</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="outputType" value="nextjs" />
+              <span class="format-icon">N</span>
+              <strong>Next.js</strong>
+              <small>App Router project</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="outputType" value="nuxt" />
+              <span class="format-icon">Nu</span>
+              <strong>Nuxt</strong>
+              <small>Nuxt 3 scaffold</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="outputType" value="react" />
+              <span class="format-icon">R</span>
+              <strong>React</strong>
+              <small>Vite React scaffold</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="outputType" value="vue" />
+              <span class="format-icon">V</span>
+              <strong>Vue</strong>
+              <small>Vite Vue scaffold</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="outputType" value="aspnet" />
+              <span class="format-icon">.N</span>
+              <strong>ASP.NET</strong>
+              <small>ASP.NET Core base</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="outputType" value="express" />
+              <span class="format-icon">Ex</span>
+              <strong>Express</strong>
+              <small>Express app scaffold</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="outputType" value="node" />
+              <span class="format-icon">Nd</span>
+              <strong>Node</strong>
+              <small>Node server scaffold</small>
+            </label>
+          </div>
+
+          <div class="section-heading options-heading">
+            <span class="step-number">04</span>
+            <div>
+              <h2>Build options</h2>
+              <p>Control asset collection and output enhancements.</p>
+            </div>
+          </div>
+
+          <div class="options-grid">
+            <label class="check-option">
+              <input name="downloadImages" type="checkbox" checked />
+              <span></span>Download Images
+            </label>
+            <label class="check-option">
+              <input name="downloadVideos" type="checkbox" checked />
+              <span></span>Download Videos
+            </label>
+            <label class="check-option">
+              <input name="downloadFonts" type="checkbox" checked />
+              <span></span>Download Fonts
+            </label>
+            <label class="check-option">
+              <input name="rewriteCss" type="checkbox" checked />
+              <span></span>Rewrite CSS
+            </label>
+            <label class="check-option">
+              <input name="optimizeImages" type="checkbox" />
+              <span></span>Optimize Images
+            </label>
+            <label class="check-option">
+              <input name="mobileResponsive" type="checkbox" checked />
+              <span></span>Mobile Responsive
+            </label>
+            <label class="check-option">
+              <input name="seoOptimize" type="checkbox" checked />
+              <span></span>SEO Optimize
+            </label>
+            <label class="check-option">
+              <input name="generateComponents" type="checkbox" />
+              <span></span>Generate Components
+            </label>
+            <label class="check-option">
+              <input name="aiCleanCode" type="checkbox" />
+              <span></span>AI Clean Code
+            </label>
+          </div>
+
+          <div class="section-heading options-heading">
+            <span class="step-number">05</span>
+            <div>
+              <h2>Export preset</h2>
+              <p>Choose the package style for the generated project.</p>
+            </div>
+          </div>
+
+          <div class="format-grid export-grid" id="export-grid">
+            <label class="format-card selected">
+              <input type="radio" name="exportFormat" value="zip" checked />
+              <span class="format-icon">ZIP</span>
+              <strong>ZIP</strong>
+              <small>Download archive</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="exportFormat" value="git" />
+              <span class="format-icon">Git</span>
+              <strong>Git Repository</strong>
+              <small>Commit-ready package</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="exportFormat" value="docker" />
+              <span class="format-icon">Dkr</span>
+              <strong>Docker</strong>
+              <small>Container-ready package</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="exportFormat" value="plesk" />
+              <span class="format-icon">Pl</span>
+              <strong>Plesk</strong>
+              <small>Hosting bundle</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="exportFormat" value="cpanel" />
+              <span class="format-icon">cP</span>
+              <strong>cPanel</strong>
+              <small>Hosting bundle</small>
+            </label>
+            <label class="format-card">
+              <input type="radio" name="exportFormat" value="ftp" />
+              <span class="format-icon">FTP</span>
+              <strong>FTP Package</strong>
+              <small>Upload-ready bundle</small>
+            </label>
+          </div>
+
+          <section id="ai-improvements" class="ai-improvements" hidden>
+            <div>
+              <span class="mini-label">AI IMPROVEMENTS</span>
+              <h3>Source cleanup options</h3>
+            </div>
+            <div class="options-grid">
+              <label class="check-option">
+                <input name="splitComponents" type="checkbox" checked />
+                <span></span>Split components
+              </label>
+              <label class="check-option">
+                <input name="removeDuplicateCss" type="checkbox" checked />
+                <span></span>Remove duplicate CSS
+              </label>
+              <label class="check-option">
+                <input name="renameClasses" type="checkbox" checked />
+                <span></span>Rename classes
+              </label>
+              <label class="check-option">
+                <input name="improveAccessibility" type="checkbox" checked />
+                <span></span>Improve accessibility
+              </label>
+              <label class="check-option">
+                <input name="generateReadme" type="checkbox" checked />
+                <span></span>Generate README
+              </label>
+              <label class="check-option">
+                <input name="generateHtaccess" type="checkbox" />
+                <span></span>Generate .htaccess
+              </label>
+              <label class="check-option">
+                <input name="generateSitemap" type="checkbox" />
+                <span></span>Generate sitemap.xml
+              </label>
+              <label class="check-option">
+                <input name="generateRobots" type="checkbox" />
+                <span></span>Generate robots.txt
+              </label>
+            </div>
+          </section>
+
+          <button id="submit-button" class="primary-button" type="submit">
+            <span class="button-label">Rebuild Website</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <aside class="inspector">
+          <section class="side-card">
+            <div class="card-title">
+              <div>
+                <span class="mini-label">LIVE PREVIEW</span>
+                <h3>Project Structure</h3>
+              </div>
+              <span class="type-badge" id="structure-type">HTML</span>
+            </div>
+            <pre id="structure-preview" class="tree"></pre>
+          </section>
+
+          <section class="side-card technology-card">
+            <div class="card-title">
+              <div>
+                <span class="mini-label">ANALYSIS</span>
+                <h3>Technology Detected</h3>
+              </div>
+            </div>
+            <div id="technology-list" class="technology-list">
+              <p class="empty-copy">Technologies appear here after analysis.</p>
+            </div>
+          </section>
+
+          <section class="side-card">
+            <div class="card-title">
+              <div>
+                <span class="mini-label">LAYOUT INTELLIGENCE</span>
+                <h3>Detected Components</h3>
+              </div>
+            </div>
+            <div id="component-list" class="inspector-list">
+              <p class="empty-copy">Components appear after analysis.</p>
+            </div>
+          </section>
+
+          <section class="side-card">
+            <div class="card-title">
+              <div>
+                <span class="mini-label">SITE MAP</span>
+                <h3>Detected Routes</h3>
+              </div>
+            </div>
+            <div id="route-list" class="inspector-list route-list">
+              <p class="empty-copy">Internal routes appear after analysis.</p>
+            </div>
+          </section>
+
+          <section class="side-card">
+            <div class="card-title">
+              <div>
+                <span class="mini-label">ASSET INVENTORY</span>
+                <h3>Asset Explorer</h3>
+              </div>
+            </div>
+            <div id="asset-summary" class="side-metrics">
+              <p class="empty-copy">Asset counts appear after analysis.</p>
+            </div>
+          </section>
+
+          <section class="side-card">
+            <div class="card-title">
+              <div>
+                <span class="mini-label">QUALITY SCORES</span>
+                <h3>Website Report</h3>
+              </div>
+            </div>
+            <div id="side-report" class="side-metrics">
+              <p class="empty-copy">Quality scores appear after analysis.</p>
+            </div>
+          </section>
+
+          <section class="side-card">
+            <div class="card-title">
+              <div>
+                <span class="mini-label">GENERATED OUTPUT</span>
+                <h3>Project Inspector</h3>
+              </div>
+            </div>
+            <div id="project-inspector" class="side-metrics">
+              <p class="empty-copy">Project metrics appear after rebuild.</p>
+            </div>
+          </section>
+        </aside>
+      </section>
+
+      <section id="progress-panel" class="progress-panel" hidden aria-live="polite">
+        <div class="progress-header">
+          <div>
+            <span class="mini-label">BUILD PIPELINE</span>
+            <h2 id="progress-title">Rebuilding your project</h2>
+          </div>
+          <span id="progress-percent">0%</span>
+        </div>
+        <div class="progress-track"><span id="progress-bar"></span></div>
+        <ol class="progress-steps" id="progress-steps">
+          <li><i></i><span>Crawling site</span></li>
+          <li><i></i><span>Collecting assets</span></li>
+          <li><i></i><span>Detecting technology</span></li>
+          <li><i></i><span>Extracting components</span></li>
+          <li><i></i><span>Generating project</span></li>
+          <li><i></i><span>Optimizing output</span></li>
+          <li><i></i><span>Creating report</span></li>
+          <li><i></i><span>Creating ZIP</span></li>
+        </ol>
+        <div id="result-actions" class="result-actions" hidden>
+          <div class="final-result">
+            <strong>Finished</strong>
+            <p id="result-message"></p>
+            <div class="final-result-grid">
+              <span>Technology <b id="result-technology">—</b></span>
+              <span>Pages <b id="result-pages">0</b></span>
+              <span>Assets <b id="result-assets">0</b></span>
+              <span>Components <b id="result-components">0</b></span>
+              <span>Similarity <b id="result-similarity">0%</b></span>
+            </div>
+          </div>
+          <a id="download-link" class="download-button" href="#">Download ZIP</a>
+        </div>
+      </section>
+
+      <section id="report-panel" class="report-panel" hidden>
+        <div class="dashboard-heading">
+          <div>
+            <span class="eyebrow">Website analysis</span>
+            <h2 id="report-title">Website Report</h2>
+          </div>
+          <span class="status-pill report-status"><i></i> Completed</span>
+        </div>
+        <div id="report-metrics" class="report-metrics"></div>
+        <div class="report-technologies">
+          <span class="mini-label">DETECTED TECHNOLOGIES</span>
+          <div id="report-technology-list" class="technology-list"></div>
+        </div>
+      </section>
+
+      <section class="dashboard">
+        <div class="dashboard-heading">
+          <div>
+            <span class="eyebrow">Project history</span>
+            <h2>Generated Projects</h2>
+          </div>
+          <button id="refresh-projects" class="ghost-button" type="button">
+            Refresh
+          </button>
+        </div>
+        <div class="project-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Source URL</th>
+                <th>Output</th>
+                <th>Mode</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="projects-list">
+              <tr><td colspan="7" class="table-empty">Loading projects…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="workspace workspace-tools">
+        <section class="side-card editor-card">
+          <div class="card-title">
+            <div>
+              <span class="mini-label">PROJECT EDITOR</span>
+              <h3>File Explorer</h3>
+            </div>
+            <span class="type-badge" id="editor-project-label">No project loaded</span>
+          </div>
+          <div class="editor-layout">
+            <aside class="editor-files">
+              <div id="editor-files" class="inspector-list">
+                <p class="empty-copy">Open a project to browse files.</p>
+              </div>
+            </aside>
+            <div class="editor-pane">
+              <div class="editor-toolbar">
+                <span id="editor-file-path" class="editor-path">Select a file</span>
+                <div class="editor-actions">
+                  <button id="editor-refresh" class="ghost-button" type="button">Reload</button>
+                  <button id="editor-save" class="primary-mini-button" type="button">Save File</button>
+                  <a id="editor-download" class="download-button" href="#" hidden>Download ZIP</a>
+                </div>
+              </div>
+              <textarea id="editor-content" spellcheck="false" placeholder="File contents appear here when you select a file."></textarea>
+              <p id="editor-status" class="editor-status">No file selected.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="side-card chat-card">
+          <div class="card-title">
+            <div>
+              <span class="mini-label">AI CHAT</span>
+              <h3>Ask for changes</h3>
+            </div>
+          </div>
+          <div id="chat-log" class="chat-log">
+            <div class="chat-bubble system">Rule-based chat is active. Future AI provider hooks are wired in the backend.</div>
+          </div>
+          <div class="chat-composer">
+            <input id="chat-input" type="text" placeholder="Example: remove duplicate CSS and add robots.txt" />
+            <button id="chat-send" class="primary-mini-button" type="button">Send</button>
+          </div>
+        </section>
+      </section>
+
+      <footer>
+        <span>Website Rebuilder AI Pro</span>
+        <p>Only rebuild websites you own or have permission to copy.</p>
+      </footer>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>
