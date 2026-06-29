@@ -1,59 +1,48 @@
-# ============================================
 # Dependencies
-# ============================================
 node_modules/
 
-# ============================================
 # Environment
-# ============================================
 .env
-.env.local
 .env.*
+!.env.example
 
-# ============================================
-# Runtime Logs
-# ============================================
+# Logs
 *.log
 logs/
 
-# ============================================
-# Generated Output
-# ============================================
+# Generated output
 output/
-storage/
+storage/projects/
+storage/exports/
+storage/cache/
+storage/reports/
 
-#!output/
-#!output/.gitkeep
-
-# ============================================
-# Cache
-# ============================================
+# Cache / test
 .cache/
 .tmp/
 coverage/
+playwright-report/
+test-results/
 
-# ============================================
-# IDE
-# ============================================
-.vscode/
-.idea/
-
-# ============================================
-# Operating System
-# ============================================
-.DS_Store
-Thumbs.db
-
-# ============================================
 # Build
-# ============================================
 dist/
 build/
 
-# ============================================
-# Misc
-# ============================================
-npm-debug.log*
+# IDE / OS
+.vscode/
+.idea/
+*.code-workspace
+.DS_Store
+Thumbs.db
+Desktop.ini
 
-*.log
-logs/
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Archives
+*.zip
+*.tar
+*.gz
