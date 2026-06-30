@@ -24,7 +24,52 @@ function removeDuplicateCssBlocks(css) {
   return blocks.join("\n\n");
 }
 
-function normalizeClassNames($) {
+function beautifyCss(css) {
+  return String(css || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\s*\{\s*/g, " {\n  ")
+    .replace(/;\s*/g, ";\n  ")
+    .replace(/\s*\}\s*/g, "\n}\n\n")
+    .replace(/\n {2}\n}/g, "\n}")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function beautifyJavaScript(js) {
+  return String(js || "")
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function beautifyHtml(html) {
+  const blockTags =
+    "address|article|aside|blockquote|body|div|dl|fieldset|footer|form|h[1-6]|head|header|html|main|nav|ol|p|section|table|ul";
+  return String(html || "")
+    .replace(/\r\n/g, "\n")
+    .replace(new RegExp(`</(${blockTags})>\\s*<`, "gi"), "</$1>\n<")
+    .replace(new RegExp(`>\\s*<(${blockTags})(?=\\s|>)`, "gi"), ">\n<$1")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function rewriteCssClassNames(css, classRenames = {}) {
+  let rewritten = String(css || "");
+  for (const [original, replacement] of Object.entries(classRenames)) {
+    const escaped = original.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    rewritten = rewritten.replace(
+      new RegExp(`\\.${escaped}(?![a-zA-Z0-9_-])`, "g"),
+      `.${replacement}`,
+    );
+  }
+  return rewritten;
+}
+
+function normalizeClassNames($, prefix = "clean-class") {
   const classMap = new Map();
   $("*[class]").each((_, element) => {
     const classes = ($(element).attr("class") || "").split(/\s+/).filter(Boolean);
@@ -35,7 +80,7 @@ function normalizeClassNames($) {
         /^(css|sc|jsx)-[a-z0-9]+$/i.test(className);
       if (!generated) return className;
       if (!classMap.has(className)) {
-        classMap.set(className, `clean-class-${classMap.size + 1}`);
+        classMap.set(className, `${prefix}-${classMap.size + 1}`);
       }
       return classMap.get(className);
     });
@@ -46,16 +91,47 @@ function normalizeClassNames($) {
 
 function cleanHtml(html, options = {}) {
   const $ = cheerio.load(html, { decodeEntities: false });
-  const inlineCss = $("style")
+  const styleBlockCount = $("style").length;
+  const styleBlocks = $("style")
     .map((_, element) => $(element).html() || "")
     .get()
     .join("\n");
-  const inlineJs = $("script:not([src])")
+  const executableScripts = $("script:not([src])").filter((_, element) => {
+    const type = ($(element).attr("type") || "").toLowerCase();
+    return !type || ["module", "text/javascript", "application/javascript"].includes(type);
+  });
+  const inlineJs = executableScripts
     .map((_, element) => $(element).html() || "")
     .get()
     .join("\n");
+  const inlineScriptCount = executableScripts.length;
+  const emptyElementCount = $("p:empty, span:empty, div:empty, section:empty").length;
 
-  $("style, script:not([src])").remove();
+  const inlineStyleRules = [];
+  const inlineStyleClasses = new Map();
+  $("[style]").each((_, element) => {
+    const declaration = ($(element).attr("style") || "").trim().replace(/;?$/, ";");
+    if (!declaration) {
+      $(element).removeAttr("style");
+      return;
+    }
+    if (!inlineStyleClasses.has(declaration)) {
+      inlineStyleClasses.set(
+        declaration,
+        `${options.inlineStylePrefix || "inline-style"}-${inlineStyleClasses.size + 1}`,
+      );
+    }
+    const className = inlineStyleClasses.get(declaration);
+    const classes = ($(element).attr("class") || "").split(/\s+/).filter(Boolean);
+    $(element).attr("class", [...new Set([...classes, className])].join(" "));
+    $(element).removeAttr("style");
+  });
+  inlineStyleClasses.forEach((className, declaration) => {
+    inlineStyleRules.push(`.${className} { ${declaration} }`);
+  });
+
+  $("style").remove();
+  executableScripts.remove();
   $("script[src]").each((_, element) => {
     if (!$(element).attr("defer") && !$(element).attr("async")) {
       $(element).attr("defer", "");
@@ -64,7 +140,13 @@ function cleanHtml(html, options = {}) {
   $("p:empty, span:empty, div:empty, section:empty").remove();
 
   const classMap =
-    options.renameClasses === false ? new Map() : normalizeClassNames($);
+    options.renameClasses === false
+      ? new Map()
+      : normalizeClassNames($, options.classNamePrefix);
+  const extractedCss = rewriteCssClassNames(
+    [styleBlocks, ...inlineStyleRules].filter(Boolean).join("\n"),
+    Object.fromEntries(classMap),
+  );
   if (options.improveAccessibility !== false) {
     $("img:not([alt])").attr("alt", "");
     $("img").attr("loading", "lazy").attr("decoding", "async");
@@ -73,17 +155,25 @@ function cleanHtml(html, options = {}) {
   }
 
   return {
-    html: $.html(),
-    css:
+    html: beautifyHtml($.html()),
+    css: beautifyCss(
       options.removeDuplicateCss === false
-        ? inlineCss
-        : removeDuplicateCssBlocks(inlineCss),
-    js: inlineJs,
+        ? extractedCss
+        : removeDuplicateCssBlocks(extractedCss),
+    ),
+    js: beautifyJavaScript(inlineJs),
     classRenames: Object.fromEntries(classMap),
+    cleanup: {
+      classNamesRenamed: classMap.size,
+      inlineStyleBlocksExtracted: styleBlockCount,
+      inlineStyleAttributesExtracted: inlineStyleClasses.size,
+      inlineScriptsExtracted: inlineScriptCount,
+      emptyElementsRemoved: emptyElementCount,
+    },
   };
 }
 
-function upgradeHtml(html, { title, sourceUrl } = {}) {
+function improveSemanticHtml(html) {
   const $ = cheerio.load(html, { decodeEntities: false });
   const semanticRules = [
     ['div[class*="header"], div[id*="header"]', "header"],
@@ -112,6 +202,12 @@ function upgradeHtml(html, { title, sourceUrl } = {}) {
       else $("body").append(main);
     }
   }
+  $("nav:not([aria-label])").attr("aria-label", "Primary navigation");
+  return beautifyHtml($.html());
+}
+
+function upgradeHtml(html, { title, sourceUrl } = {}) {
+  const $ = cheerio.load(improveSemanticHtml(html), { decodeEntities: false });
 
   if (!$('meta[name="viewport"]').length) {
     $("head").prepend(
@@ -132,14 +228,13 @@ function upgradeHtml(html, { title, sourceUrl } = {}) {
     $("head").append('<link rel="canonical">');
     $('link[rel="canonical"]').last().attr("href", sourceUrl);
   }
-  $("nav:not([aria-label])").attr("aria-label", "Primary navigation");
   $("img:not([alt])").attr("alt", "");
   $("img").attr("loading", "lazy").attr("decoding", "async");
   $("button:not([type])").attr("type", "button");
   $("a[target='_blank']:not([rel])").attr("rel", "noopener noreferrer");
 
   return {
-    html: $.html(),
+    html: beautifyHtml($.html()),
     css: `/* AI Upgrade layout foundations */
 html { scroll-behavior: smooth; }
 body { margin: 0; font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; }
@@ -189,9 +284,14 @@ async function generateSupportFiles({
 // to a model here for semantic refactoring after rule-based validation.
 
 module.exports = {
+  beautifyCss,
+  beautifyHtml,
+  beautifyJavaScript,
   cleanHtml,
   generateSupportFiles,
+  improveSemanticHtml,
   normalizeClassNames,
   removeDuplicateCssBlocks,
+  rewriteCssClassNames,
   upgradeHtml,
 };

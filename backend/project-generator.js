@@ -2,8 +2,12 @@ const path = require("path");
 const cheerio = require("cheerio");
 const fs = require("fs-extra");
 const {
+  beautifyCss,
+  beautifyJavaScript,
   cleanHtml,
+  improveSemanticHtml,
   removeDuplicateCssBlocks,
+  rewriteCssClassNames,
   upgradeHtml,
 } = require("./cleaner");
 const {
@@ -78,7 +82,7 @@ async function moveDirectory(source, destination) {
   await fs.remove(source);
 }
 
-function preparePage(page, mode, options, projectName, sourceUrl) {
+function preparePage(page, mode, options, projectName, sourceUrl, pageIndex = 0) {
   if (mode === "mirror") {
     return { ...page, html: page.html, css: "", js: "" };
   }
@@ -89,9 +93,11 @@ function preparePage(page, mode, options, projectName, sourceUrl) {
           title: page.title || projectName,
           sourceUrl: page.url || sourceUrl,
         })
-      : { html: page.html, css: "" };
+      : { html: improveSemanticHtml(page.html), css: "" };
   const cleaned = cleanHtml(upgraded.html, {
     ...options,
+    classNamePrefix: `clean-class-page-${pageIndex + 1}`,
+    inlineStylePrefix: `inline-style-page-${pageIndex + 1}`,
     removeDuplicateCss: true,
     renameClasses: true,
     improveAccessibility: true,
@@ -102,7 +108,46 @@ function preparePage(page, mode, options, projectName, sourceUrl) {
     css: [upgraded.css, cleaned.css].filter(Boolean).join("\n\n"),
     js: cleaned.js,
     classRenames: cleaned.classRenames,
+    cleanup: cleaned.cleanup,
   };
+}
+
+function combinedClassRenames(pages) {
+  return Object.assign({}, ...pages.map((page) => page.classRenames || {}));
+}
+
+function cleanupReport({ pages, mode }) {
+  const totals = pages.reduce(
+    (result, page) => {
+      for (const [key, value] of Object.entries(page.cleanup || {})) {
+        result[key] = (result[key] || 0) + value;
+      }
+      return result;
+    },
+    {},
+  );
+  const classRenames = combinedClassRenames(pages);
+
+  return `# Cleanup Report
+
+Mode: ${mode}
+Pages processed: ${pages.length}
+
+## Applied cleanup
+
+- Generated class names renamed: ${totals.classNamesRenamed || 0}
+- Inline style blocks extracted: ${totals.inlineStyleBlocksExtracted || 0}
+- Inline style attributes extracted: ${totals.inlineStyleAttributesExtracted || 0}
+- Inline scripts extracted: ${totals.inlineScriptsExtracted || 0}
+- Empty elements removed: ${totals.emptyElementsRemoved || 0}
+- HTML, CSS, and JavaScript formatting normalized
+- Semantic landmarks and accessibility-safe defaults applied
+- Component section comments added where the output format supports HTML comments
+
+## Class name map
+
+${Object.entries(classRenames).map(([from, to]) => `- \`${from}\` -> \`${to}\``).join("\n") || "- No generated class names required renaming."}
+`;
 }
 
 function supportFileContents(pages, sourceUrl) {
@@ -304,8 +349,8 @@ async function generateStatic(context) {
     projectName,
     sourceUrl,
   } = context;
-  const processed = pages.map((page) =>
-    preparePage(page, mode, options, projectName, sourceUrl),
+  const processed = pages.map((page, index) =>
+    preparePage(page, mode, options, projectName, sourceUrl, index),
   );
   const primary = processed[0];
   const built = await buildComponentFiles({
@@ -420,11 +465,18 @@ async function generateStatic(context) {
 
   await fs.writeFile(
     path.join(directory, "style.css"),
-    mode === "mirror" ? css : removeDuplicateCssBlocks(css),
+    mode === "mirror"
+      ? css
+      : beautifyCss(
+          rewriteCssClassNames(
+            removeDuplicateCssBlocks(css),
+            combinedClassRenames(processed),
+          ),
+        ),
   );
   await fs.writeFile(
     path.join(directory, "script.js"),
-    js || '"use strict";\n',
+    beautifyJavaScript(js) || '"use strict";\n',
   );
   return { pages: processed, components, componentMap: built.componentMap, generatedFiles: built.generatedFiles };
 }
@@ -438,8 +490,8 @@ async function generatePhp(context) {
     projectName,
     sourceUrl,
   } = context;
-  const processed = pages.map((page) =>
-    preparePage(page, mode, options, projectName, sourceUrl),
+  const processed = pages.map((page, index) =>
+    preparePage(page, mode, options, projectName, sourceUrl, index),
   );
   const primary = processed[0];
   const built = await buildComponentFiles({
@@ -486,7 +538,113 @@ async function generatePhp(context) {
       );
     }
   }
+  await applyExtractedAssets("php", directory, processed);
+  await rewriteGeneratedCss(directory, combinedClassRenames(processed));
   return { pages: processed, components, componentMap: built.componentMap, generatedFiles: built.generatedFiles };
+}
+
+async function appendFile(filePath, content) {
+  if (!content) return;
+  await fs.appendFile(filePath, `\n${content.trim()}\n`);
+}
+
+async function replaceInFile(filePath, search, replacement) {
+  if (!(await fs.pathExists(filePath))) return;
+  const content = await fs.readFile(filePath, "utf8");
+  await fs.writeFile(filePath, content.replace(search, replacement));
+}
+
+async function applyExtractedAssets(outputType, directory, pages) {
+  const classRenames = combinedClassRenames(pages);
+  const css = beautifyCss(
+    rewriteCssClassNames(
+      pages.map((page) => page.css).filter(Boolean).join("\n\n"),
+      classRenames,
+    ),
+  );
+  const js = beautifyJavaScript(
+    pages.map((page) => page.js).filter(Boolean).join("\n\n"),
+  );
+  if (!css && !js) return;
+
+  if (outputType === "php") {
+    if (css) {
+      await fs.outputFile(path.join(directory, "assets", "css", "rebuilt-inline.css"), `${css}\n`);
+      await replaceInFile(
+        path.join(directory, "includes", "header.php"),
+        "</head>",
+        '<link rel="stylesheet" href="/assets/css/rebuilt-inline.css"></head>',
+      );
+    }
+    if (js) {
+      await fs.outputFile(path.join(directory, "assets", "js", "rebuilt-inline.js"), `${js}\n`);
+      await replaceInFile(
+        path.join(directory, "includes", "footer.php"),
+        "</body>",
+        '<script src="/assets/js/rebuilt-inline.js" defer></script></body>',
+      );
+    }
+  } else if (outputType === "laravel") {
+    if (css) await fs.outputFile(path.join(directory, "public", "css", "rebuilt-inline.css"), `${css}\n`);
+    if (js) await fs.outputFile(path.join(directory, "public", "js", "rebuilt-inline.js"), `${js}\n`);
+    await replaceInFile(
+      path.join(directory, "resources", "views", "layouts", "app.blade.php"),
+      "</head>",
+      `${css ? "\n  <link rel=\"stylesheet\" href=\"{{ asset('css/rebuilt-inline.css') }}\">" : ""}\n</head>`,
+    );
+    if (js) {
+      await replaceInFile(
+        path.join(directory, "resources", "views", "layouts", "app.blade.php"),
+        "</body>",
+        "  <script src=\"{{ asset('js/rebuilt-inline.js') }}\" defer></script>\n</body>",
+      );
+    }
+  } else if (outputType === "wordpress") {
+    if (css) await appendFile(path.join(directory, "style.css"), css);
+    if (js) {
+      await fs.writeFile(path.join(directory, "rebuilt-inline.js"), `${js}\n`);
+      await appendFile(
+        path.join(directory, "functions.php"),
+        "\nfunction rebuilt_theme_scripts() {\n    wp_enqueue_script('rebuilt-inline', get_template_directory_uri() . '/rebuilt-inline.js', [], '1.0.0', true);\n}\nadd_action('wp_enqueue_scripts', 'rebuilt_theme_scripts');",
+      );
+    }
+  } else if (outputType === "nextjs") {
+    if (css) await appendFile(path.join(directory, "app", "globals.css"), css);
+    if (js) {
+      await fs.outputFile(path.join(directory, "public", "rebuilt-inline.js"), `${js}\n`);
+      await replaceInFile(
+        path.join(directory, "app", "layout.js"),
+        "{children}</body>",
+        '{children}<script src="/rebuilt-inline.js" defer /></body>',
+      );
+    }
+  } else if (["react", "vue"].includes(outputType)) {
+    if (css) await appendFile(path.join(directory, "src", "styles.css"), css);
+    if (js) {
+      await fs.outputFile(path.join(directory, "public", "rebuilt-inline.js"), `${js}\n`);
+      await appendFile(
+        path.join(directory, "index.html"),
+        '\n<script src="/rebuilt-inline.js" defer></script>',
+      );
+    }
+  }
+}
+
+async function rewriteGeneratedCss(directory, classRenames) {
+  if (!(await fs.pathExists(directory)) || !Object.keys(classRenames).length) return;
+  const entries = await fs.readdir(directory, { withFileTypes: true });
+  for (const entry of entries) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      await rewriteGeneratedCss(entryPath, classRenames);
+    } else if (entry.name.endsWith(".css")) {
+      const css = await fs.readFile(entryPath, "utf8");
+      await fs.writeFile(
+        entryPath,
+        `${beautifyCss(rewriteCssClassNames(css, classRenames))}\n`,
+      );
+    }
+  }
 }
 
 async function generateScaffold(context) {
@@ -499,8 +657,8 @@ async function generateScaffold(context) {
     projectName,
     sourceUrl,
   } = context;
-  const processed = pages.map((page) =>
-    preparePage(page, mode, options, projectName, sourceUrl),
+  const processed = pages.map((page, index) =>
+    preparePage(page, mode, options, projectName, sourceUrl, index),
   );
   const primary = processed[0];
   const built = await buildComponentFiles({
@@ -895,6 +1053,8 @@ ${components.map((component) => `    <${componentIdentifier(component.name)} />`
       '<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup></Project>',
     );
   }
+  await applyExtractedAssets(outputType, directory, processed);
+  await rewriteGeneratedCss(directory, combinedClassRenames(processed));
   return {
     pages: processed,
     components,
@@ -984,6 +1144,12 @@ async function generateProjectV1({
         technologies,
         components: generated.components,
       }),
+    );
+  }
+  if (mode !== "mirror") {
+    await fs.writeFile(
+      path.join(stagingDirectory, "CLEANUP_REPORT.md"),
+      cleanupReport({ pages: generated.pages, mode }),
     );
   }
   await fs.writeFile(

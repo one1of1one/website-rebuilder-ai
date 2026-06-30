@@ -85,8 +85,13 @@ async function main() {
       "style.css",
       "script.js",
       "COMPONENTS.md",
+      "CLEANUP_REPORT.md",
       "README.md",
     ],
+    contentChecks: {
+      "index.html": "<!-- Navbar component -->",
+      "CLEANUP_REPORT.md": "Inline scripts extracted:",
+    },
   });
 
   const phpRun = await runGeneration({
