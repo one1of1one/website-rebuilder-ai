@@ -56,6 +56,18 @@ async function runGeneration({
         `${outputType}/${mode}: expected ${file}`,
       );
     }
+    for (const reportFile of [
+      "RECONSTRUCTION.md",
+      "reconstruction.json",
+      "component-graph.json",
+      "semantic-map.json",
+      "framework-map.json",
+    ]) {
+      assert(
+        await fs.pathExists(path.join(tempRoot, reportFile)),
+        `${outputType}/${mode}: expected ${reportFile}`,
+      );
+    }
     for (const [file, expectedContent] of Object.entries(contentChecks)) {
       const content = await fs.readFile(path.join(tempRoot, file), "utf8");
       assert(
@@ -66,6 +78,8 @@ async function runGeneration({
     assert(result.outputStructure.length > 0, `${outputType}/${mode}: outputStructure empty`);
     assert(result.componentMap.length > 0, `${outputType}/${mode}: componentMap empty`);
     assert(result.generatedFiles.length > 0, `${outputType}/${mode}: generatedFiles empty`);
+    assert(result.reconstruction.domGraph.nodeCount > 0, `${outputType}/${mode}: DOM graph empty`);
+    assert(result.reconstruction.componentGraph.nodes.length > 0, `${outputType}/${mode}: component graph empty`);
     return { tempRoot, result };
   } finally {
     await fs.remove(tempRoot);
@@ -105,6 +119,7 @@ async function main() {
       "includes/header.php",
       "includes/footer.php",
       "components/navbar.php",
+      "pages/home.php",
       "COMPONENTS.md",
     ],
     contentChecks: {
@@ -123,10 +138,11 @@ async function main() {
       "composer.json",
       "resources/views/layouts/app.blade.php",
       "resources/views/home.blade.php",
+      "resources/views/pages/home.blade.php",
       "resources/views/components/navbar.blade.php",
     ],
     contentChecks: {
-      "resources/views/home.blade.php": "<x-navbar />",
+      "resources/views/pages/home.blade.php": "<x-navbar />",
       "README.md": "Laravel structure",
     },
   });
@@ -138,14 +154,15 @@ async function main() {
     projectName: "Next Fixture",
     sourceUrl: "https://example.com/",
     expectedFiles: [
-      "app/page.js",
+      "app/page.jsx",
+      "app/layout.jsx",
       "README.md",
       "COMPONENTS.md",
       "MIGRATION_NOTES.md",
       "components/navbar.jsx",
     ],
     contentChecks: {
-      "app/page.js": "<Navbar />",
+      "app/page.jsx": "<Navbar />",
       "README.md": "Next.js structure",
     },
   });
@@ -197,11 +214,48 @@ async function main() {
       "page.php",
       "functions.php",
       "template-parts/navbar.php",
+      "front-page.php",
       "README.md",
     ],
     contentChecks: {
       "page.php": "template-parts/navbar",
       "README.md": "WordPress structure",
+    },
+  });
+
+  const expressRun = await runGeneration({
+    html,
+    outputType: "express",
+    mode: "ai-rebuild",
+    projectName: "Express Fixture",
+    sourceUrl: "https://example.com/",
+    expectedFiles: [
+      "views/index.html",
+      "routes/index.js",
+      "public/index.html",
+      "server.js",
+    ],
+    contentChecks: {
+      "server.js": 'import routes from "./routes/index.js"',
+      "framework-map.json": '"outputType": "express"',
+    },
+  });
+
+  const aspnetRun = await runGeneration({
+    html,
+    outputType: "aspnet",
+    mode: "ai-rebuild",
+    projectName: "ASP.NET Fixture",
+    sourceUrl: "https://example.com/",
+    expectedFiles: [
+      "Controllers/HomeController.cs",
+      "Views/Home/Index.cshtml",
+      "Views/Shared/Components/navbar.cshtml",
+      "Program.cs",
+    ],
+    contentChecks: {
+      "Views/Home/Index.cshtml": '<partial name="Components/navbar"',
+      "framework-map.json": '"outputType": "aspnet"',
     },
   });
 
@@ -230,6 +284,8 @@ async function main() {
           react: reactRun.result.outputStructure.slice(0, 8),
           vue: vueRun.result.outputStructure.slice(0, 8),
           wordpress: wordpressRun.result.outputStructure.slice(0, 8),
+          express: expressRun.result.outputStructure.slice(0, 8),
+          aspnet: aspnetRun.result.outputStructure.slice(0, 8),
         },
       },
       null,

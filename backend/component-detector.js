@@ -38,11 +38,38 @@ const RULES = [
     ],
   },
   {
+    name: "Feature Grid",
+    type: "feature-grid",
+    selectors: [
+      ['[class*="feature-grid"], [class*="features-grid"]', 0.97],
+      ['section[class*="features"] [class*="grid"]', 0.91],
+      ['[class*="feature-card"]', 0.86],
+    ],
+  },
+  {
     name: "Cards",
     type: "cards",
     selectors: [
       ['[class~="card"], [class*="-card"], [class*="card-"]', 0.91],
       ["main article", 0.72],
+    ],
+  },
+  {
+    name: "Dashboard Cards",
+    type: "dashboard-cards",
+    selectors: [
+      ['[class*="dashboard"] [class*="card"]', 0.94],
+      ['[class*="metric-card"], [class*="stat-card"], [class*="kpi-card"]', 0.97],
+      ['[class*="dashboard-grid"], [class*="metrics-grid"]', 0.9],
+    ],
+  },
+  {
+    name: "Tables",
+    type: "tables",
+    selectors: [
+      ["table", 0.99],
+      ['[role="table"], [class*="data-table"]', 0.95],
+      ['[class*="table-responsive"]', 0.9],
     ],
   },
   {

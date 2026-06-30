@@ -16,6 +16,7 @@ const {
   componentIdentifier,
 } = require("./component-builder");
 const { writeExportPreset } = require("./export-manager");
+const { reconstructWebsite } = require("./reconstruction");
 
 function slug(value, fallback = "page") {
   return (
@@ -245,6 +246,41 @@ What still needs manual wiring:
 `;
 }
 
+function reconstructionMarkdown(reconstruction) {
+  return `# Reconstruction Report
+
+- Source: ${reconstruction.sourceUrl}
+- Output framework: ${reconstruction.outputType}
+- DOM nodes analyzed: ${reconstruction.domGraph.nodeCount}
+- Semantic sections: ${reconstruction.semanticMap.count}
+- Components classified: ${reconstruction.componentGraph.nodes.length}
+- Routes mapped: ${reconstruction.routePageMap.routes.length}
+- Assets mapped: ${reconstruction.assetComponentRelationships.assets.length}
+
+## Components
+
+${reconstruction.componentGraph.nodes
+  .map(
+    (component) =>
+      `- ${component.name} (${component.type}, ${component.confidence}% confidence)`,
+  )
+  .join("\n") || "- No reusable components detected."}
+
+## Routes
+
+${reconstruction.routePageMap.pages
+  .map((page) => `- \`${page.path}\` - ${page.title}`)
+  .join("\n") || "- No routes discovered."}
+
+## Framework mapping
+
+- Entry: \`${reconstruction.frameworkMap.structure.entry}\`
+- Components: \`${reconstruction.frameworkMap.structure.components}\`
+- Pages: \`${reconstruction.frameworkMap.structure.pages}\`
+- Assets: \`${reconstruction.frameworkMap.structure.assets}\`
+`;
+}
+
 const FRAMEWORK_GUIDES = {
   php: {
     runtime: "PHP 8.1+",
@@ -272,7 +308,7 @@ const FRAMEWORK_GUIDES = {
     install: "npm install",
     start: "npm run dev",
     components: "components/*.jsx",
-    entry: "app/page.js",
+    entry: "app/page.jsx",
   },
   vue: {
     runtime: "Node.js 18+",
@@ -523,9 +559,20 @@ async function generatePhp(context) {
             )
             .join("\n")
         : `echo <<<'HTML'\n${body}\nHTML;`;
+    const pageSource = `<?php
+require __DIR__ . '/includes/header.php';
+${componentRequires}
+require __DIR__ . '/includes/footer.php';
+`;
     await fs.writeFile(
       path.join(directory, pageFilename(page.path, "php")),
-      `<?php\nrequire __DIR__ . '/includes/header.php';\n${componentRequires}\nrequire __DIR__ . '/includes/footer.php';\n`,
+      pageSource,
+    );
+    const reconstructedPageName =
+      page.path === "/" ? "home.php" : pageFilename(page.path, "php");
+    await fs.outputFile(
+      path.join(directory, "pages", reconstructedPageName),
+      pageSource.replaceAll("__DIR__ . '/", "dirname(__DIR__) . '/"),
     );
   }
 
@@ -613,7 +660,7 @@ async function applyExtractedAssets(outputType, directory, pages) {
     if (js) {
       await fs.outputFile(path.join(directory, "public", "rebuilt-inline.js"), `${js}\n`);
       await replaceInFile(
-        path.join(directory, "app", "layout.js"),
+        path.join(directory, "app", "layout.jsx"),
         "{children}</body>",
         '{children}<script src="/rebuilt-inline.js" defer /></body>',
       );
@@ -677,9 +724,20 @@ async function generateScaffold(context) {
       path.join(directory, "assets"),
       path.join(directory, "public", "assets"),
     );
+    const laravelRoutes = processed
+      .map((page) => {
+        const route = page.path || "/";
+        const view = route === "/" ? "home" : slug(route, "page");
+        return `Route::view(${JSON.stringify(route)}, 'pages.${view}');`;
+      })
+      .join("\n");
     await fs.outputFile(
       path.join(directory, "routes", "web.php"),
-      "<?php\nuse Illuminate\\Support\\Facades\\Route;\nRoute::view('/', 'home');\n",
+      `<?php
+use Illuminate\\Support\\Facades\\Route;
+
+${laravelRoutes}
+`,
     );
     await fs.outputFile(
       path.join(directory, "resources", "views", "layouts", "app.blade.php"),
@@ -696,14 +754,36 @@ async function generateScaffold(context) {
 </html>
 `,
     );
-    await fs.outputFile(
-      path.join(directory, "resources", "views", "home.blade.php"),
-      `@extends('layouts.app')
+    for (const page of processed) {
+      const view = page.path === "/" ? "home" : slug(page.path, "page");
+      const pageMarkup =
+        page === primary
+          ? components
+              .map(
+                (component) =>
+                  `  <x-${slug(component.name, "component")} />`,
+              )
+              .join("\n")
+          : cheerio.load(page.html, { decodeEntities: false })("body").html() || "";
+      await fs.outputFile(
+        path.join(
+          directory,
+          "resources",
+          "views",
+          "pages",
+          `${view}.blade.php`,
+        ),
+        `@extends('layouts.app')
 
 @section('content')
-${components.map((component) => `  <x-${slug(component.name, "component")} />`).join("\n")}
+${pageMarkup}
 @endsection
 `,
+      );
+    }
+    await fs.outputFile(
+      path.join(directory, "resources", "views", "home.blade.php"),
+      "@include('pages.home')\n",
     );
     await fs.writeJson(
       path.join(directory, "composer.json"),
@@ -779,6 +859,10 @@ ${contentComponents
 <?php get_footer(); ?>
 `,
     );
+    await fs.copy(
+      path.join(directory, "page.php"),
+      path.join(directory, "front-page.php"),
+    );
     await fs.writeFile(
       path.join(directory, "single.php"),
       "<?php get_header(); ?><main id=\"primary\"><?php while (have_posts()) : the_post(); the_content(); endwhile; ?></main><?php get_footer(); ?>\n",
@@ -802,7 +886,7 @@ ${contentComponents
       })
       .join("\n");
     await fs.outputFile(
-      path.join(directory, "app", "page.js"),
+      path.join(directory, "app", "page.jsx"),
       `${imports}
 
 export default function Home() {
@@ -815,7 +899,7 @@ ${components.map((component) => `      <${componentIdentifier(component.name)} /
 `,
     );
     await fs.outputFile(
-      path.join(directory, "app", "layout.js"),
+      path.join(directory, "app", "layout.jsx"),
       `import "./globals.css";
 
 export const metadata = {
@@ -875,23 +959,59 @@ export default function RootLayout({ children }) {
       path.join(directory, "assets"),
       path.join(directory, "public", "assets"),
     );
-    await fs.outputFile(
+    const expressPages = [];
+    for (const [index, page] of processed.entries()) {
+      const filename = index === 0 ? "index.html" : `${slug(page.path, `page-${index + 1}`)}.html`;
+      await fs.outputFile(path.join(directory, "views", filename), page.html);
+      expressPages.push({ route: page.path || "/", filename });
+    }
+    await fs.copy(
+      path.join(directory, "views", "index.html"),
       path.join(directory, "public", "index.html"),
-      primary.html,
     );
+    const expressRoutes = expressPages
+      .map(
+        (page) =>
+          `router.get(${JSON.stringify(page.route)}, (_request, response) => response.sendFile(path.join(viewsDirectory, ${JSON.stringify(page.filename)})));`,
+      )
+      .join("\n");
     await fs.outputFile(
       path.join(directory, "routes", "index.js"),
-      "module.exports = (req, res) => res.sendFile(require('path').join(__dirname, '../public/index.html'));\n",
+      `import { Router } from "express";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const router = Router();
+const directory = path.dirname(fileURLToPath(import.meta.url));
+const viewsDirectory = path.join(directory, "..", "views");
+
+${expressRoutes}
+
+export default router;
+`,
     );
     await fs.outputFile(
       path.join(directory, "server.js"),
-      `const express = require('express');\nconst path = require('path');\nconst app = express();\nconst port = process.env.PORT || 3000;\napp.use(express.static(path.join(__dirname, 'public')));\napp.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));\napp.listen(port, () => console.log('Express scaffold running on port ' + port));\n`,
+      `import express from "express";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import routes from "./routes/index.js";
+
+const directory = path.dirname(fileURLToPath(import.meta.url));
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(express.static(path.join(directory, "public")));
+app.use(routes);
+app.listen(port, () => console.log(\`Express reconstruction running on port \${port}\`));
+`,
     );
     await fs.writeJson(
       path.join(directory, "package.json"),
       {
         name: slug(projectName),
         private: true,
+        type: "module",
         scripts: { dev: "node server.js", start: "node server.js" },
         dependencies: { express: "^4.21.2" },
       },
@@ -930,9 +1050,16 @@ export default function RootLayout({ children }) {
           `import ${componentIdentifier(component.name)} from "../components/${path.basename(component.file).replace(/\.[^.]+$/, "")}";`,
       )
       .join("\n");
-    await fs.outputFile(
-      path.join(directory, "src", "pages", "Home.jsx"),
-      `${imports}
+    const reactPages = [];
+    for (const [index, page] of processed.entries()) {
+      const pageName =
+        index === 0
+          ? "Home"
+          : componentIdentifier(page.title || slug(page.path, `Page${index + 1}`));
+      const filename = `${pageName}.jsx`;
+      const content =
+        index === 0
+          ? `${imports}
 
 export default function Home() {
   return (
@@ -941,11 +1068,40 @@ ${components.map((component) => `      <${componentIdentifier(component.name)} /
     </main>
   );
 }
-`,
-    );
+`
+          : `const markup = ${JSON.stringify(
+              cheerio.load(page.html, { decodeEntities: false })("body").html() || "",
+            ).replace(/</g, "\\u003c")};
+
+export default function ${pageName}() {
+  return <main dangerouslySetInnerHTML={{ __html: markup }} />;
+}
+`;
+      await fs.outputFile(
+        path.join(directory, "src", "pages", filename),
+        content,
+      );
+      reactPages.push({ path: page.path || "/", name: pageName, filename });
+    }
+    const reactPageImports = reactPages
+      .map((page) => `import ${page.name} from "./pages/${page.name}";`)
+      .join("\n");
+    const reactRouteMap = reactPages
+      .map((page) => `  ${JSON.stringify(page.path)}: ${page.name},`)
+      .join("\n");
     await fs.outputFile(
       path.join(directory, "src", "App.jsx"),
-      'import Home from "./pages/Home";\n\nexport default function App() {\n  return <Home />;\n}\n',
+      `${reactPageImports}
+
+const pages = {
+${reactRouteMap}
+};
+
+export default function App() {
+  const Page = pages[window.location.pathname] || Home;
+  return <Page />;
+}
+`,
     );
     await fs.outputFile(
       path.join(directory, "src", "main.jsx"),
@@ -986,9 +1142,15 @@ ${components.map((component) => `      <${componentIdentifier(component.name)} /
           `import ${componentIdentifier(component.name)} from "../components/${path.basename(component.file)}";`,
       )
       .join("\n");
-    await fs.outputFile(
-      path.join(directory, "src", "views", "Home.vue"),
-      `<script setup>
+    const vuePages = [];
+    for (const [index, page] of processed.entries()) {
+      const pageName =
+        index === 0
+          ? "Home"
+          : componentIdentifier(page.title || slug(page.path, `Page${index + 1}`));
+      const content =
+        index === 0
+          ? `<script setup>
 ${imports}
 </script>
 
@@ -997,11 +1159,40 @@ ${imports}
 ${components.map((component) => `    <${componentIdentifier(component.name)} />`).join("\n")}
   </main>
 </template>
-`,
-    );
+`
+          : `<template>
+  <main>
+${cheerio.load(page.html, { decodeEntities: false })("body").html() || ""}
+  </main>
+</template>
+`;
+      await fs.outputFile(
+        path.join(directory, "src", "views", `${pageName}.vue`),
+        content,
+      );
+      vuePages.push({ path: page.path || "/", name: pageName });
+    }
+    const vuePageImports = vuePages
+      .map((page) => `import ${page.name} from "./views/${page.name}.vue";`)
+      .join("\n");
+    const vueRouteMap = vuePages
+      .map((page) => `  ${JSON.stringify(page.path)}: ${page.name},`)
+      .join("\n");
     await fs.outputFile(
       path.join(directory, "src", "App.vue"),
-      '<script setup>\nimport Home from "./views/Home.vue";\n</script>\n\n<template>\n  <Home />\n</template>\n',
+      `<script setup>
+${vuePageImports}
+
+const pages = {
+${vueRouteMap}
+};
+const Page = pages[window.location.pathname] || Home;
+</script>
+
+<template>
+  <component :is="Page" />
+</template>
+`,
     );
     await fs.outputFile(
       path.join(directory, "src", "main.js"),
@@ -1036,13 +1227,42 @@ ${components.map((component) => `    <${componentIdentifier(component.name)} />`
       path.join(directory, "assets"),
       path.join(directory, "wwwroot", "assets"),
     );
+    const aspPages = [];
+    for (const [index, page] of processed.entries()) {
+      const name =
+        index === 0
+          ? "Index"
+          : componentIdentifier(page.title || slug(page.path, `Page${index + 1}`));
+      const markup =
+        index === 0 && components.length
+          ? components
+              .map(
+                (component) =>
+                  `<partial name="Components/${path.basename(component.file).replace(/\.cshtml$/, "")}" />`,
+              )
+              .join("\n")
+          : page.html;
+      await fs.outputFile(
+        path.join(directory, "Views", "Home", `${name}.cshtml`),
+        markup,
+      );
+      aspPages.push(name);
+    }
+    const aspActions = aspPages
+      .map(
+        (name) =>
+          `    public IActionResult ${name}() => View(${JSON.stringify(name)});`,
+      )
+      .join("\n");
     await fs.outputFile(
       path.join(directory, "Controllers", "HomeController.cs"),
-      "using Microsoft.AspNetCore.Mvc;public class HomeController:Controller{public IActionResult Index()=>View();}\n",
-    );
-    await fs.outputFile(
-      path.join(directory, "Views", "Home", "Index.cshtml"),
-      primary.html,
+      `using Microsoft.AspNetCore.Mvc;
+
+public class HomeController : Controller
+{
+${aspActions}
+}
+`,
     );
     await fs.writeFile(
       path.join(directory, "Program.cs"),
@@ -1085,10 +1305,23 @@ async function generateProjectV1({
   sourceUrl,
   technologies,
   detectedComponents = [],
+  assets = {},
+  reconstruction,
   mode = "mirror",
   options = {},
   exportFormat = "zip",
 }) {
+  const reconstructionModel =
+    reconstruction ||
+    reconstructWebsite({
+      pages,
+      assets,
+      sourceUrl,
+      outputType,
+    });
+  const reconstructedComponents = reconstructionModel.componentGraph.nodes.map(
+    ({ name, type, confidence, count }) => ({ name, type, confidence, count }),
+  );
   const context = {
     pages,
     outputType,
@@ -1096,7 +1329,9 @@ async function generateProjectV1({
     projectName,
     sourceUrl,
     technologies,
-    detectedComponents,
+    detectedComponents: reconstructedComponents.length
+      ? reconstructedComponents
+      : detectedComponents,
     mode,
     options,
   };
@@ -1106,6 +1341,43 @@ async function generateProjectV1({
       : outputType === "php"
         ? await generatePhp(context)
         : await generateScaffold(context);
+  const generatedComponentFiles = new Map(
+    (generated.componentMap || []).map((component) => [
+      component.name,
+      component.file,
+    ]),
+  );
+  reconstructionModel.frameworkMap.components =
+    reconstructionModel.frameworkMap.components.map((component) => ({
+      ...component,
+      target: generatedComponentFiles.get(component.name) || component.target,
+    }));
+  await Promise.all([
+    fs.writeFile(
+      path.join(stagingDirectory, "RECONSTRUCTION.md"),
+      reconstructionMarkdown(reconstructionModel),
+    ),
+    fs.writeJson(
+      path.join(stagingDirectory, "reconstruction.json"),
+      reconstructionModel,
+      { spaces: 2 },
+    ),
+    fs.writeJson(
+      path.join(stagingDirectory, "component-graph.json"),
+      reconstructionModel.componentGraph,
+      { spaces: 2 },
+    ),
+    fs.writeJson(
+      path.join(stagingDirectory, "semantic-map.json"),
+      reconstructionModel.semanticMap,
+      { spaces: 2 },
+    ),
+    fs.writeJson(
+      path.join(stagingDirectory, "framework-map.json"),
+      reconstructionModel.frameworkMap,
+      { spaces: 2 },
+    ),
+  ]);
   const support = supportFileContents(generated.pages, sourceUrl);
   const publicRoots = {
     laravel: "public",
@@ -1172,6 +1444,7 @@ async function generateProjectV1({
     components: generated.components,
     componentMap: generated.componentMap || [],
     generatedFiles: generated.generatedFiles || [],
+    reconstruction: reconstructionModel,
     outputStructure: await listProjectFiles(stagingDirectory),
   };
 }

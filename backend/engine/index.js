@@ -6,6 +6,7 @@ const { detectComponents } = require("../component-detector");
 const { generateProjectV1 } = require("../project-generator");
 const { generateWebsiteReport } = require("../reporter");
 const { createZip } = require("../zipper");
+const reconstruction = require("../reconstruction");
 
 module.exports = {
   analyzeHtml,
@@ -18,4 +19,5 @@ module.exports = {
   generateProjectV1,
   generateWebsiteReport,
   createZip,
+  reconstruction,
 };

@@ -228,7 +228,7 @@ function upgradeHtml(html, { title, sourceUrl } = {}) {
     $("head").append('<link rel="canonical">');
     $('link[rel="canonical"]').last().attr("href", sourceUrl);
   }
-  $("img:not([alt])").attr("alt", "");
+  $("img:not([alt])").attr("alt", "Image description");
   $("img").attr("loading", "lazy").attr("decoding", "async");
   $("button:not([type])").attr("type", "button");
   $("a[target='_blank']:not([rel])").attr("rel", "noopener noreferrer");

@@ -3,6 +3,7 @@ const {
   cleanHtml,
   improveSemanticHtml,
   rewriteCssClassNames,
+  upgradeHtml,
 } = require("../backend/cleaner");
 
 function main() {
@@ -35,6 +36,19 @@ function main() {
   const semantic = improveSemanticHtml(cleaned.html);
   assert(semantic.includes("<header"), "header-like containers should become semantic headers");
   assert(semantic.includes("<main"), "main-like containers should become semantic main elements");
+
+  const upgraded = upgradeHtml(
+    "<html><head></head><body><div class=\"main-content\"><img src=\"photo.jpg\"></div></body></html>",
+    { title: "Upgrade", sourceUrl: "https://example.com/" },
+  );
+  assert(
+    upgraded.html.includes('alt="Image description"'),
+    "AI upgrade should add an alt placeholder",
+  );
+  assert(
+    upgraded.html.includes('name="description"'),
+    "AI upgrade should add a meta description",
+  );
 
   assert.strictEqual(
     rewriteCssClassNames(".old-name:hover { color: red; }", { "old-name": "new-name" }),

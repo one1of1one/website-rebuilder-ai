@@ -8,7 +8,10 @@ const BUILD_RULES = {
   header: ["header", '[role="banner"]', '[class*="site-header"], [id*="header"]'],
   navbar: ["nav", '[role="navigation"]', '[class*="navbar"], [class*="main-menu"]'],
   hero: ['[class~="hero"], [id~="hero"]', '[class*="hero-"], [class*="-hero"], [class*="jumbotron"]', '[class*="banner"]'],
+  "feature-grid": ['[class*="feature-grid"], [class*="features-grid"]', 'section[class*="features"] [class*="grid"]', '[class*="feature-card"]'],
   cards: ['[class~="card"], [class*="-card"], [class*="card-"]', "main article"],
+  "dashboard-cards": ['[class*="dashboard"] [class*="card"]', '[class*="metric-card"], [class*="stat-card"], [class*="kpi-card"]'],
+  tables: ["table", '[role="table"], [class*="data-table"]'],
   gallery: ['[class*="gallery"], [id*="gallery"]', '[data-gallery], [class*="lightbox"]'],
   faq: ['[class*="faq"], [id*="faq"]', "details", '[itemtype*="FAQPage"]'],
   "contact-form": ['form[action*="contact"], form[class*="contact"]', "form textarea", "form input[type='email']"],
@@ -72,7 +75,8 @@ function componentIdentifier(name) {
 function wrapJsxComponent(name, html) {
   const markup = JSON.stringify(html).replace(/</g, "\\u003c");
   const identifier = componentIdentifier(name);
-  return `const markup = ${markup};
+  return `// Reconstructed ${name} component.
+const markup = ${markup};
 
 export default function ${identifier}() {
   return (
@@ -85,8 +89,8 @@ export default function ${identifier}() {
 `;
 }
 
-function wrapVueComponent(html) {
-  return `<template>\n${html}\n</template>\n`;
+function wrapVueComponent(name, html) {
+  return `<template>\n  <!-- Reconstructed ${name} component -->\n${html}\n</template>\n`;
 }
 
 function componentFileInfo(outputType, name) {
@@ -156,9 +160,11 @@ async function writeComponentFile(directory, component, outputType) {
       : outputType === "php"
         ? wrapPhpComponent(component.name, component.html)
         : outputType === "vue"
-          ? wrapVueComponent(component.html)
-          : outputType === "laravel" || outputType === "wordpress" || outputType === "aspnet"
-            ? component.html
+          ? wrapVueComponent(component.name, component.html)
+          : outputType === "laravel"
+            ? `{{-- Reconstructed ${component.name} component --}}\n${component.html}\n`
+            : outputType === "wordpress" || outputType === "aspnet"
+              ? `<!-- Reconstructed ${component.name} component -->\n${component.html}\n`
             : wrapJsxComponent(component.name, component.html),
   );
   return info.file;

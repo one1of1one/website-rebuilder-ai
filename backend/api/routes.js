@@ -332,6 +332,7 @@ async function performRebuild(requestBody) {
     projectName,
     technologies: analysis.technologies,
     detectedComponents: analysis.components,
+    assets,
     mode,
     options,
     exportFormat: normalizedExportFormat,
