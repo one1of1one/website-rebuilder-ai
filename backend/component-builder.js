@@ -2,6 +2,11 @@ const path = require("path");
 const cheerio = require("cheerio");
 const fs = require("fs-extra");
 const { detectComponents } = require("./component-detector");
+const {
+  convertHtmlToBlade,
+  convertHtmlToJsx,
+  convertHtmlToVueTemplate,
+} = require("./conversion");
 const { slugify } = require("./utils");
 
 const BUILD_RULES = {
@@ -73,9 +78,22 @@ function componentIdentifier(name) {
 }
 
 function wrapJsxComponent(name, html) {
-  const markup = JSON.stringify(html).replace(/</g, "\\u003c");
   const identifier = componentIdentifier(name);
+  const converted = convertHtmlToJsx(html);
+  if (converted.safe) {
+    return `// Reconstructed ${name} component.
+export default function ${identifier}() {
+  return (
+    <>
+      ${converted.code}
+    </>
+  );
+}
+`;
+  }
+  const markup = JSON.stringify(converted.fallbackMarkup).replace(/</g, "\\u003c");
   return `// Reconstructed ${name} component.
+// Conversion fallback: ${converted.warnings.join("; ")}
 const markup = ${markup};
 
 export default function ${identifier}() {
@@ -90,7 +108,31 @@ export default function ${identifier}() {
 }
 
 function wrapVueComponent(name, html) {
-  return `<template>\n  <!-- Reconstructed ${name} component -->\n${html}\n</template>\n`;
+  const converted = convertHtmlToVueTemplate(html);
+  if (converted.safe) {
+    return `<template>
+  <!-- Reconstructed ${name} component -->
+  ${converted.code}
+</template>
+`;
+  }
+  const markup = JSON.stringify(converted.fallbackMarkup).replace(/</g, "\\u003c");
+  return `<script setup>
+const markup = ${markup};
+</script>
+
+<template>
+  <!-- Conversion fallback: ${converted.warnings.join("; ")} -->
+  <div v-html="markup" />
+</template>
+`;
+}
+
+function wrapBladeComponent(name, html) {
+  const converted = convertHtmlToBlade(html);
+  return `{{-- Reconstructed ${name} component --}}
+${converted.code}
+`;
 }
 
 function componentFileInfo(outputType, name) {
@@ -162,7 +204,7 @@ async function writeComponentFile(directory, component, outputType) {
         : outputType === "vue"
           ? wrapVueComponent(component.name, component.html)
           : outputType === "laravel"
-            ? `{{-- Reconstructed ${component.name} component --}}\n${component.html}\n`
+            ? wrapBladeComponent(component.name, component.html)
             : outputType === "wordpress" || outputType === "aspnet"
               ? `<!-- Reconstructed ${component.name} component -->\n${component.html}\n`
             : wrapJsxComponent(component.name, component.html),

@@ -17,6 +17,11 @@ const {
 } = require("./component-builder");
 const { writeExportPreset } = require("./export-manager");
 const { reconstructWebsite } = require("./reconstruction");
+const {
+  convertHtmlToBlade,
+  convertHtmlToJsx,
+  convertHtmlToVueTemplate,
+} = require("./conversion");
 
 function slug(value, fallback = "page") {
   return (
@@ -764,7 +769,9 @@ ${laravelRoutes}
                   `  <x-${slug(component.name, "component")} />`,
               )
               .join("\n")
-          : cheerio.load(page.html, { decodeEntities: false })("body").html() || "";
+          : convertHtmlToBlade(
+              cheerio.load(page.html, { decodeEntities: false })("body").html() || "",
+            ).code;
       await fs.outputFile(
         path.join(
           directory,
@@ -1057,6 +1064,9 @@ app.listen(port, () => console.log(\`Express reconstruction running on port \${p
           ? "Home"
           : componentIdentifier(page.title || slug(page.path, `Page${index + 1}`));
       const filename = `${pageName}.jsx`;
+      const bodyMarkup =
+        cheerio.load(page.html, { decodeEntities: false })("body").html() || "";
+      const convertedPage = convertHtmlToJsx(bodyMarkup);
       const content =
         index === 0
           ? `${imports}
@@ -1069,9 +1079,17 @@ ${components.map((component) => `      <${componentIdentifier(component.name)} /
   );
 }
 `
-          : `const markup = ${JSON.stringify(
-              cheerio.load(page.html, { decodeEntities: false })("body").html() || "",
-            ).replace(/</g, "\\u003c")};
+          : convertedPage.safe
+            ? `export default function ${pageName}() {
+  return (
+    <main>
+      ${convertedPage.code}
+    </main>
+  );
+}
+`
+            : `// Conversion fallback: ${convertedPage.warnings.join("; ")}
+const markup = ${JSON.stringify(convertedPage.fallbackMarkup).replace(/</g, "\\u003c")};
 
 export default function ${pageName}() {
   return <main dangerouslySetInnerHTML={{ __html: markup }} />;
@@ -1148,6 +1166,9 @@ export default function App() {
         index === 0
           ? "Home"
           : componentIdentifier(page.title || slug(page.path, `Page${index + 1}`));
+      const vueBodyMarkup =
+        cheerio.load(page.html, { decodeEntities: false })("body").html() || "";
+      const convertedVuePage = convertHtmlToVueTemplate(vueBodyMarkup);
       const content =
         index === 0
           ? `<script setup>
@@ -1160,10 +1181,19 @@ ${components.map((component) => `    <${componentIdentifier(component.name)} />`
   </main>
 </template>
 `
-          : `<template>
+          : convertedVuePage.safe
+            ? `<template>
   <main>
-${cheerio.load(page.html, { decodeEntities: false })("body").html() || ""}
+    ${convertedVuePage.code}
   </main>
+</template>
+`
+            : `<script setup>
+const markup = ${JSON.stringify(convertedVuePage.fallbackMarkup).replace(/</g, "\\u003c")};
+</script>
+
+<template>
+  <main v-html="markup" />
 </template>
 `;
       await fs.outputFile(

@@ -17,6 +17,7 @@ async function runGeneration({
   sourceUrl,
   expectedFiles = [],
   contentChecks = {},
+  absentContentChecks = {},
 }) {
   const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "rebuilder-gen-"));
   try {
@@ -73,6 +74,13 @@ async function runGeneration({
       assert(
         content.includes(expectedContent),
         `${outputType}/${mode}: ${file} did not contain ${expectedContent}`,
+      );
+    }
+    for (const [file, unexpectedContent] of Object.entries(absentContentChecks)) {
+      const content = await fs.readFile(path.join(tempRoot, file), "utf8");
+      assert(
+        !content.includes(unexpectedContent),
+        `${outputType}/${mode}: ${file} unexpectedly contained ${unexpectedContent}`,
       );
     }
     assert(result.outputStructure.length > 0, `${outputType}/${mode}: outputStructure empty`);
@@ -145,6 +153,9 @@ async function main() {
       "resources/views/pages/home.blade.php": "<x-navbar />",
       "README.md": "Laravel structure",
     },
+    absentContentChecks: {
+      "resources/views/components/navbar.blade.php": "dangerouslySetInnerHTML",
+    },
   });
 
   const migrationRun = await runGeneration({
@@ -165,6 +176,9 @@ async function main() {
       "app/page.jsx": "<Navbar />",
       "README.md": "Next.js structure",
     },
+    absentContentChecks: {
+      "components/navbar.jsx": "dangerouslySetInnerHTML",
+    },
   });
 
   const reactRun = await runGeneration({
@@ -183,6 +197,9 @@ async function main() {
       "src/pages/Home.jsx": "<Navbar />",
       "README.md": "React structure",
     },
+    absentContentChecks: {
+      "src/components/navbar.jsx": "dangerouslySetInnerHTML",
+    },
   });
 
   const vueRun = await runGeneration({
@@ -200,6 +217,9 @@ async function main() {
     contentChecks: {
       "src/views/Home.vue": "<Navbar />",
       "README.md": "Vue structure",
+    },
+    absentContentChecks: {
+      "src/components/navbar.vue": "v-html",
     },
   });
 
