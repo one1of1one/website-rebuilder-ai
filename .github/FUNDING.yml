@@ -1,0 +1,17 @@
+# Configure verified funding accounts before enabling the GitHub Sponsor button.
+# Replace the examples below and remove the leading "#" from each provider in use.
+
+# github: [github-sponsors-username]
+# patreon: patreon-username
+# open_collective: open-collective-project
+# ko_fi: ko-fi-username
+# tidelift: npm/package-name
+# community_bridge: project-name
+# liberapay: liberapay-username
+# issuehunt: issuehunt-username
+# lfx_crowdfunding: project-name
+# polar: polar-username
+# buy_me_a_coffee: buy-me-a-coffee-username
+# thanks_dev: github-username
+# custom:
+#   - https://example.org/sponsor
