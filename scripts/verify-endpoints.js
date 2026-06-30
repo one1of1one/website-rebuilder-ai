@@ -96,6 +96,16 @@ async function main() {
 
   const inspector = await requestJsonWithFallback(`/api/project/${projectId}/inspector`);
   assert(inspector.response.ok, "/api/project/:id/inspector failed");
+  assert(inspector.data.componentTree?.type === "document", "inspector componentTree missing");
+  assert(
+    inspector.data.componentTree.children?.length > 0,
+    "inspector componentTree did not include detected components",
+  );
+  assert(inspector.data.domSummary?.totalElements > 0, "inspector domSummary missing");
+  assert(
+    Array.isArray(inspector.data.assetComponentMap?.components),
+    "inspector assetComponentMap missing",
+  );
   checks.push({ endpoint: "GET /api/project/:id/inspector", status: inspector.response.status });
 
   const files = await requestJsonWithFallback(`/api/project/${projectId}/files`);

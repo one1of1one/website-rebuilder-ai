@@ -12,6 +12,7 @@ const {
 } = require("../engine");
 const { writeExportPreset } = require("../exporters");
 const ai = require("../ai");
+const { buildInspectorData } = require("../inspector");
 const {
   calculateProjectStats,
   formatBytes,
@@ -172,6 +173,28 @@ async function writeProjectReports(projectId, report, directory) {
         failedAssets: report.failedAssets,
       },
     ],
+    [
+      path.join(directory, "inspector", "component-tree.json"),
+      report.componentTree || report.inspector?.componentTree || {},
+    ],
+    [
+      path.join(directory, "inspector", "dom-summary.json"),
+      report.domSummary || report.inspector?.domSummary || {},
+    ],
+    [
+      path.join(directory, "inspector", "asset-component-map.json"),
+      report.assetComponentMap || report.inspector?.assetComponentMap || {},
+    ],
+    [
+      path.join(directory, "inspector", "inspector.json"),
+      {
+        projectId: report.projectId,
+        componentTree: report.componentTree || report.inspector?.componentTree || {},
+        domSummary: report.domSummary || report.inspector?.domSummary || {},
+        assetComponentMap:
+          report.assetComponentMap || report.inspector?.assetComponentMap || {},
+      },
+    ],
   ];
 
   for (const [filePath, value] of payloads) {
@@ -315,11 +338,25 @@ async function performRebuild(requestBody) {
   });
 
   const projectStats = await calculateProjectStats(stagingDirectory);
+  const inspectorComponents = rebuildResult.componentMap?.length
+    ? rebuildResult.componentMap
+    : components.map((component) => ({ ...component, file: null }));
+  const inspectorData = buildInspectorData({
+    html: analysis.html,
+    componentMap: inspectorComponents,
+    assets,
+    dom: analysis.dom,
+    sourceUrl: analysis.finalUrl,
+  });
   const reportStructure = [
     ...rebuildResult.outputStructure,
     "report.json",
     "REPORT.md",
     "website-report.json",
+    "inspector/asset-component-map.json",
+    "inspector/component-tree.json",
+    "inspector/dom-summary.json",
+    "inspector/inspector.json",
   ].sort();
 
   const report = generateWebsiteReport({
@@ -349,6 +386,7 @@ async function performRebuild(requestBody) {
       assetsDownloaded: collected.assetCount,
       componentMap: rebuildResult.componentMap || [],
       generatedFiles: rebuildResult.generatedFiles || [],
+      ...inspectorData,
       estimatedSimilarity:
         mode === "mirror"
           ? 98
@@ -591,6 +629,11 @@ function registerApiRoutes(app) {
         assetsDownloaded: project?.assetCount || 0,
         zipSize,
         zipSizeFormatted: formatBytes(zipSize),
+        componentMap: report.componentMap || report.inspector?.componentMap || [],
+        componentTree: report.componentTree || report.inspector?.componentTree || {},
+        domSummary: report.domSummary || report.inspector?.domSummary || {},
+        assetComponentMap:
+          report.assetComponentMap || report.inspector?.assetComponentMap || {},
       });
     }),
   );

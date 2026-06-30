@@ -93,6 +93,18 @@ function generateWebsiteReport({
   const domDetails = analysis.dom || {};
   const componentMap = inspector.componentMap || [];
   const generatedFiles = inspector.generatedFiles || outputStructure;
+  const componentTree = inspector.componentTree || {
+    id: "document",
+    name: "Document",
+    type: "document",
+    children: [],
+  };
+  const domSummary = inspector.domSummary || {};
+  const assetComponentMap = inspector.assetComponentMap || {
+    components: [],
+    assets: [],
+    unmappedAssets: [],
+  };
 
   return {
     projectId: project.id || null,
@@ -122,6 +134,9 @@ function generateWebsiteReport({
     detectedComponents: components,
     componentCount: components.length,
     componentMap,
+    componentTree,
+    domSummary,
+    assetComponentMap,
     detectedRoutes,
     layoutType: layoutDetails.pageType || "corporate",
     layoutPattern: layoutDetails.layoutPattern || "single-column",
@@ -167,6 +182,9 @@ function generateWebsiteReport({
       zipSizeFormatted: formatBytes(inspector.zipSize || 0),
       componentMap,
       generatedFiles,
+      componentTree,
+      domSummary,
+      assetComponentMap,
     },
   };
 }
