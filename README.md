@@ -1,426 +1,608 @@
-# Website Rebuilder AI
+<div align="center">
 
-Analyze. Reverse Engineer. Rebuild.
+# 🌐 Website Rebuilder AI
 
-Reforge AI is an AI website reverse engineering and modernization platform.
-It analyzes a public website, crawls its structure, detects its stack, extracts
-assets and components, and rebuilds the result into a clean developer-friendly
-project.
+### Analyze. Reverse Engineer. Rebuild.
 
-The current application uses a plain HTML/CSS/JavaScript frontend and a
-Node.js + Express backend. Frameworks such as Next.js and React are generated
-outputs only; they are not used to run this application.
+Website Rebuilder AI turns public websites into structured, developer-ready projects.
+It crawls pages, identifies technologies and components, audits quality, rebuilds the
+site in your chosen stack, and packages the result for continued development.
 
-## Features
+[![Node Version](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-F7DF1E?style=for-the-badge&logo=javascript&logoColor=000000)](https://developer.mozilla.org/docs/Web/JavaScript)
+[![MIT License](https://img.shields.io/badge/License-MIT-8A2BE2?style=for-the-badge)](#license)
 
-- Modern dark project builder and generated-project dashboard
-- Target URL and custom project name
-- Static HTML, PHP, Laravel, WordPress Theme, Next.js, Nuxt, React, Vue,
-  Express, Node, and ASP.NET output formats
-- Asset controls for images, video, fonts, icons, documents, manifests, and
-  CSS path rewriting
-- Optional optimization and code-generation settings stored with each project
-- Common technology detection using HTML, response headers, and asset URLs
-- Live URL analysis before generation
-- Dynamic output-structure preview and eight-stage engine progress display
-- Persistent project metadata and reusable ZIP download links
-- Persistent per-project website reports with downloadable ZIP integration
-- Export presets for ZIP, Git Repository, Docker, Plesk, cPanel, and FTP
-- Storage-backed editable projects in `storage/projects/`
-- Project editor and rule-based AI chat panel
-- Mirror Mode for direct HTML/CSS/JavaScript and asset mirroring
-- Rule-based AI Rebuild Mode for semantic section detection, component
-  extraction, class cleanup, CSS deduplication, and developer-friendly output
-- Framework Migration Mode for scaffold-first framework conversion
-- Sitemap, robots.txt, and same-domain link crawling for up to 25 pages
-- Confidence-scored component detection and categorized asset exploration
-- Project inspection with source size, file count, pages, components, assets,
-  and ZIP size
+[![Build Status](https://github.com/one1of1one/website-rebuilder-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/one1of1one/website-rebuilder-ai/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/one1of1one/website-rebuilder-ai/actions/workflows/codeql.yml/badge.svg)](https://github.com/one1of1one/website-rebuilder-ai/actions/workflows/codeql.yml)
+[![GitHub Stars](https://img.shields.io/github/stars/one1of1one/website-rebuilder-ai?style=flat-square&logo=github&label=Stars)](https://github.com/one1of1one/website-rebuilder-ai/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/one1of1one/website-rebuilder-ai?style=flat-square&logo=github&label=Forks)](https://github.com/one1of1one/website-rebuilder-ai/forks)
+[![GitHub Issues](https://img.shields.io/github/issues/one1of1one/website-rebuilder-ai?style=flat-square&logo=github&label=Issues)](https://github.com/one1of1one/website-rebuilder-ai/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/one1of1one/website-rebuilder-ai?style=flat-square&logo=git&label=Last%20Commit)](https://github.com/one1of1one/website-rebuilder-ai/commits/main)
 
-## Documentation map
+[Quick Start](#-installation) ·
+[Features](#-key-features) ·
+[Architecture](#-architecture) ·
+[API](#-api-reference) ·
+[Documentation](#-documentation) ·
+[Contributing](CONTRIBUTING.md)
 
-Sprint 0 architecture and planning documents live in `docs/` and now include:
+</div>
+---
 
-- `docs/00-product-vision.md`
-- `docs/01-roadmap.md`
-- `docs/02-system-architecture.md`
-- `docs/03-folder-structure.md`
-- `docs/04-api-design.md`
-- `docs/05-database-design.md`
-- `docs/06-engine-design.md`
-- `docs/07-ai-engine.md`
-- `docs/08-plugin-system.md`
-- `docs/09-deployment-strategy.md`
-- `docs/10-security.md`
-- `docs/11-testing-strategy.md`
-- `docs/12-coding-standards.md`
-- `docs/13-sprint-plan.md`
-- `docs/14-architecture-diagrams.md`
-- `docs/15-decision-log.md`
+## ✨ Introduction
 
-AI Rebuild Mode does not require an external AI service. It currently uses
-deterministic rules and includes a documented integration point in
-`backend/rebuilder.js` for a future OpenAI or Codex code-generation stage.
+Website Rebuilder AI is **not a simple website downloader**. A downloader copies
+the response it receives; Website Rebuilder AI examines how a site is assembled,
+models its routes and reusable regions, and creates an editable project around the
+result.
 
-## Rebuild modes
+The engine can:
 
-### Mirror Mode
+- 🔎 Analyze public HTTP and HTTPS websites across multiple same-domain pages.
+- 🧬 Detect frameworks, libraries, CMS products, analytics tools, and delivery services.
+- 🧩 Identify semantic components such as navigation, heroes, cards, forms, and footers.
+- 🏗️ Rebuild analyzed content into clean, target-specific project structures.
+- 🪄 Upgrade markup, responsive foundations, SEO metadata, and accessibility attributes.
+- 📦 Export persistent, developer-ready projects with source files, reports, and assets.
 
-When AI Rebuild Mode is off, the existing pipeline is unchanged:
+> [!IMPORTANT]
+> Website Rebuilder AI reconstructs what a browser can access. It does not recover
+> private source code, databases, server configuration, or original backend logic.
 
-- Download the returned HTML and reachable CSS, JavaScript, images, video, and
-  fonts according to selected options
-- Rewrite downloaded asset paths
-- Wrap the mirrored page in the selected output scaffold
-- Create a ZIP
+> [!NOTE]
+> The current AI rebuild and chat paths are deterministic and rule-based. Provider
+> abstractions for OpenAI, Claude, Gemini, Ollama, and OpenRouter are integration
+> points; no external AI service is required to run the project.
 
-### AI Rebuild Mode
+---
 
-When enabled, the pipeline additionally:
+## 🚀 Key Features
 
-- Detects headers, navigation, hero areas, cards, forms, FAQ blocks, content
-  sections, and footers
-- Normalizes generated class names and removes inline implementation noise
-- Deduplicates downloaded CSS rules for static HTML output
-- Splits semantic sections into output-specific components
-- Generates a readable README with detected technologies and components
-- Uses developer-oriented structures for all eight output types
-- Supports component splitting, CSS deduplication, class renaming,
-  accessibility improvements, README files, `.htaccess`, `sitemap.xml`, and
-  `robots.txt`
+| Capability | What it delivers |
+| :--- | :--- |
+| ✅ **Website Analysis** | Crawls up to 25 same-domain pages and inventories content, routes, headers, and assets. |
+| ✅ **Technology Detection** | Recognizes frontend stacks, CMS platforms, libraries, analytics, CDNs, and service integrations. |
+| ✅ **Component Detection** | Finds headers, navigation, heroes, sliders, cards, galleries, forms, FAQs, pricing, tabs, and more. |
+| ✅ **SEO Analysis** | Scores titles, metadata, canonical URLs, semantic structure, and other discoverability signals. |
+| ✅ **Accessibility Analysis** | Surfaces common accessibility gaps and can improve selected markup attributes. |
+| ✅ **Performance Analysis** | Reports asset and document signals that influence page weight and delivery quality. |
+| ✅ **AI Rebuild Mode** | Applies rule-based cleanup, semantic section extraction, component splitting, and code generation. |
+| ✅ **AI Upgrade Mode** | Modernizes markup, responsive layout foundations, metadata, accessibility, CSS, and JavaScript. |
+| ✅ **Framework Migration** | Reconstructs analyzed pages inside a selected target framework scaffold. |
+| ✅ **Project Export** | Creates ZIP, Git-oriented, Docker, Plesk, cPanel, or FTP-ready bundles. |
+| ✅ **Reports** | Persists JSON and Markdown reports with scores, routes, assets, technologies, and project statistics. |
+| ✅ **AI Chat** | Provides project-aware, rule-based change suggestions through a stable provider-ready API. |
+| ✅ **Project History** | Stores generated project metadata, editable files, reports, and reusable download links. |
 
-### AI Upgrade
+### Rebuild modes
 
-AI Upgrade runs the component rebuild pipeline and additionally:
+| Mode | Best for | Behavior |
+| :--- | :--- | :--- |
+| 🪞 **Mirror Website** | High-fidelity local reconstruction | Downloads reachable content and assets, rewrites paths, and wraps the result in the selected output. |
+| 🧠 **AI Rebuild Project** | Cleaner developer handoff | Detects sections, normalizes classes, deduplicates CSS, and creates reusable components. |
+| ⬆️ **AI Upgrade** | Modernizing an older frontend | Adds semantic HTML, responsive foundations, extracted styles/scripts, SEO, and accessibility improvements. |
+| 🔁 **Framework Migration** | Moving to a new stack | Uses the analysis model to generate a scaffold-first project for the chosen target. |
 
-- Converts recognizable wrapper elements to semantic HTML5
-- Adds modern responsive flex/grid layout foundations
-- Extracts inline CSS and JavaScript
-- Removes duplicate CSS rules
-- Improves SEO metadata and accessibility attributes
-- Generates README, Apache/Plesk `.htaccess`, `robots.txt`, and `sitemap.xml`
+---
 
-### Framework Migration
+## 📦 Supported Outputs
 
-Framework Migration reuses the analysis engine but biases the generator toward
-the selected target stack. It is intended for conversions such as HTML to
-Laravel, HTML to Next.js, PHP to Laravel, WordPress to Next.js, Bootstrap to
-React, Vue to Next.js, React to Laravel Blade, and similar migration paths.
+Generation targets and delivery formats are deliberately separated: a target controls
+the generated source structure, while an export format controls how that project is
+packaged.
 
-## Technology analysis
+| Output | Type | Generated result |
+| :--- | :---: | :--- |
+| **Static HTML** | Project | Multi-page HTML, CSS, JavaScript, localized assets, and component annotations. |
+| **PHP** | Project | PHP pages and reusable includes/components. |
+| **Laravel** | Project | Laravel-oriented scaffold with Blade-ready structure and migration notes. |
+| **React** | Project | Component-oriented React scaffold for continued application development. |
+| **Next.js** | Project | Next.js project scaffold with page and component boundaries. |
+| **Vue** | Project | Vue scaffold with generated component structure. |
+| **WordPress Theme** | Project | Theme-oriented PHP structure ready for WordPress development. |
+| **Express** | Project | Node.js and Express scaffold serving the reconstructed frontend. |
+| **ASP.NET** | Project | ASP.NET-oriented scaffold and generated web assets. |
+| **Docker** | Export | Container files added to a generated project bundle. |
+| **ZIP** | Export | Portable archive containing source, assets, and reports. |
 
-Select **Analyze URL** after entering a target to inspect the site before
-building. Detection covers HTML, CSS, JavaScript, PHP hints, Laravel, Blade,
-Livewire, WordPress, Elementor, WooCommerce, React, Next.js, Vue, Nuxt,
-Angular, Bootstrap, Tailwind, jQuery, Alpine.js, Swiper, AOS, GSAP,
-FontAwesome, Google Fonts, Cloudflare, Vite, Axios, Shopify, Webflow, Google
-Analytics, Meta Pixel, Tag Manager, CDNs, video providers, maps, payment
-providers, layout types, component families, SEO signals, accessibility gaps,
-and performance signals.
+Additional implemented targets include **Nuxt** and **Node**. Additional export
+presets include **Git Repository**, **Plesk**, **cPanel**, and **FTP Package**.
 
-Every completed build receives a persisted website report containing page and
-asset counts, detected technologies, confidence-scored components, internal
-routes, responsive status, SEO/accessibility/performance scores, estimated
-similarity, project size, and file count.
+---
 
-## Analysis engine
+## 🏛️ Architecture
 
-The rule-based engine is split into focused backend modules:
+The application uses a plain HTML, CSS, and JavaScript frontend with a Node.js and
+Express backend. The backend composes focused crawler, analysis, reconstruction,
+generation, reporting, storage, and export modules.
 
-- `analyzer.js` performs DOM, layout, SEO, accessibility, and performance
-  analysis alongside technology detection.
-- `component-detector.js` detects Header, Navbar, Hero, Slider, Cards, Gallery,
-  FAQ, Contact Form, Footer, Testimonials, Blog Cards, Product Grid, Pricing,
-  Breadcrumb, Sidebar, Modal, Accordion, and Tabs sections with confidence
-  scores.
-- `crawler.js` tries `robots.txt` and sitemap files, then crawls normalized
-  same-domain links up to the 25-page limit.
-- `route-detector.js` provides URL and route normalization primitives.
-- `asset-analyzer.js` inventories images, CSS, JavaScript, fonts, videos,
-  icons, SVG, audio, PDFs, manifests, JSON files, and external CDN assets.
-- `asset-collector.js` downloads assets into organized folders, rewrites HTML
-  and CSS paths, and records failed downloads.
-- `component-builder.js` creates reusable PHP/framework component files and
-  static section comments, component maps, and output-specific placeholders.
-- `project-generator.js` produces multi-page Static/PHP projects and clean
-  framework scaffold outputs with `COMPONENTS.md`, `README.md`, and
-  `MIGRATION_NOTES.md` where applicable.
-- `engine/index.js` provides a single modular backend entrypoint.
-- `export-manager.js` adds export-preset files such as Docker and Git helper
-  artifacts.
-- `ai/` contains the provider abstraction and rule-based chat actions.
-- `reporter.js` produces analysis scores, website reports, and generated-project
-  statistics.
-- `cleaner.js` performs rule-based HTML/CSS/JavaScript cleanup and creates
-  optional support files.
-- `docs/14-architecture-diagrams.md` captures Mermaid diagrams for the full
-  engine flow, storage layout, and future SaaS shape.
-- `docs/15-decision-log.md` records the architectural decisions that keep the
-  product scope accurate and stable.
+### System architecture
 
-These modules include a documented extension point for future OpenAI-assisted
-semantic refactoring. No external AI API is required by the current engine.
+```mermaid
+flowchart TB
+    User([Developer]) --> UI[Web Dashboard<br/>HTML · CSS · JavaScript]
+    UI --> API[Express API]
 
-## Requirements
+    subgraph Intelligence["Analysis & Reconstruction"]
+        Crawl[Crawler]
+        Analyze[Analyzer]
+        Detect[Technology Detectors]
+        Components[Component Detector]
+        Assets[Asset Collector]
+        Quality[SEO · Accessibility · Performance]
+        Rebuild[Rebuild & Upgrade Engine]
+    end
 
-- Node.js 18 or newer
+    subgraph Delivery["Generation & Delivery"]
+        Generate[Project Generator]
+        Reports[Report Generator]
+        Export[Export Manager]
+    end
+
+    API --> Crawl
+    Crawl --> Analyze
+    Analyze --> Detect
+    Analyze --> Components
+    Analyze --> Assets
+    Analyze --> Quality
+    Detect --> Rebuild
+    Components --> Rebuild
+    Assets --> Rebuild
+    Rebuild --> Generate
+    Generate --> Reports
+    Generate --> Export
+
+    Reports --> ReportStore[(storage/reports)]
+    Generate --> ProjectStore[(storage/projects)]
+    Export --> ExportStore[(storage/exports)]
+    ExportStore --> Download([Developer-ready bundle])
+```
+
+### Analysis pipeline
+
+```mermaid
+flowchart LR
+    URL[Target URL] --> Validate{Valid public<br/>HTTP/S URL?}
+    Validate -- No --> Error[Structured API error]
+    Validate -- Yes --> Robots[Read robots.txt<br/>and sitemap]
+    Robots --> Crawl[Crawl same-domain pages<br/>maximum 25]
+    Crawl --> DOM[Parse HTML<br/>and response headers]
+    DOM --> Tech[Detect technologies]
+    DOM --> Comp[Detect components]
+    DOM --> Route[Normalize routes]
+    DOM --> Asset[Inventory assets]
+    Tech --> Score[Calculate quality scores]
+    Comp --> Score
+    Route --> Score
+    Asset --> Score
+    Score --> Result[Analysis response<br/>and website report]
+```
+
+### Rebuild pipeline
+
+```mermaid
+sequenceDiagram
+    actor Developer
+    participant API as Rebuild API
+    participant Crawler
+    participant Analyzer
+    participant Collector as Asset Collector
+    participant Engine as Rebuild Engine
+    participant Generator
+    participant Reporter
+    participant Exporter
+
+    Developer->>API: URL + mode + target + options
+    API->>Crawler: Discover and fetch pages
+    Crawler-->>Analyzer: Pages, routes, headers
+    Analyzer-->>API: Technologies, components, scores
+    API->>Collector: Download and rewrite selected assets
+    Collector-->>Engine: Localized pages and asset map
+    Engine->>Generator: Cleaned model and build settings
+    Generator-->>Reporter: Generated files and statistics
+    Reporter-->>Exporter: Project plus JSON/Markdown reports
+    Exporter-->>API: ZIP or deployment-oriented bundle
+    API-->>Developer: Project metadata and download URL
+```
+
+For the extended diagrams, including storage, exports, API flows, and the provider
+abstraction, see [Architecture Diagrams](docs/14-architecture-diagrams.md).
+
+---
+
+## 🖼️ Screenshots
+
+### Dashboard
+
+![Website Rebuilder AI dashboard](https://placehold.co/1440x810/0b1020/8b5cf6?text=Website+Rebuilder+AI+%E2%80%94+Dashboard)
+
+### Analysis
+
+![Website analysis workspace](https://placehold.co/1440x810/0b1020/22d3ee?text=Website+Rebuilder+AI+%E2%80%94+Analysis)
+
+### Inspector
+
+![Generated project inspector](https://placehold.co/1440x810/0b1020/a78bfa?text=Website+Rebuilder+AI+%E2%80%94+Inspector)
+
+### Reports
+
+![Website report view](https://placehold.co/1440x810/0b1020/34d399?text=Website+Rebuilder+AI+%E2%80%94+Reports)
+
+### Export
+
+![Project export view](https://placehold.co/1440x810/0b1020/f59e0b?text=Website+Rebuilder+AI+%E2%80%94+Export)
+
+---
+
+## 🛠️ Installation
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) 18 or newer
 - npm
+- Git
+- Network access to the public sites you are authorized to analyze
 
-## Installation
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/one1of1one/website-rebuilder-ai.git
+cd website-rebuilder-ai
+```
+
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-## Run
-
-Development mode with file watching:
-
-```bash
-npm run dev
-```
-
-Production-style start:
+### 3. Start the application
 
 ```bash
 npm start
 ```
 
-The default address is <http://localhost:4000>. To use another port in
-PowerShell:
+Open [http://localhost:3000](http://localhost:3000). Set `PORT` to run the server
+on a different port.
 
-```powershell
-$env:PORT = "4000"
-npm run dev
-```
-
-## Test and verification
-
-The repository now includes a fast analyzer unit test suite and an endpoint
-verification script that exercises the core API surface against a running local
-server:
+### 4. Run the test suite
 
 ```bash
 npm test
+```
+
+For file-watching development or API verification:
+
+```bash
+npm run dev
 npm run verify:endpoints
 ```
 
-`npm test` runs the analyzer and generator fixture tests. `npm run
-verify:endpoints` and `npm run test:api` run the API verification check.
+> [!TIP]
+> Start the server before running `npm run verify:endpoints`. The verification
+> script accepts `BASE_URL` or `PORT` when the server is not using its default.
 
-By default the script targets `http://localhost:3000`. Set `PORT` or `BASE_URL`
-if you are running the server elsewhere.
+---
 
-## Usage
+## 🎛️ Usage
 
-1. Enter a public HTTP or HTTPS target URL.
-2. Enter a project name.
-3. Choose one of the eight output formats.
-4. Select asset and build options.
-5. Choose **Mirror Website**, **AI Rebuild Project**, **Framework Migration**,
-   or **AI Upgrade**.
-6. Select **Rebuild Website**.
-7. Review the final website report and download the generated ZIP.
+1. Enter a public website URL and a project name.
+2. Run **Analyze URL** to inspect the site before generation.
+3. Choose a project output, rebuild mode, export preset, and asset options.
+4. Start the rebuild and allow the bounded crawler to inspect same-domain pages.
+5. Review the report, component map, routes, assets, and generated file tree.
+6. Edit stored project files or request project-aware suggestions through AI Chat.
+7. Download the generated archive or create another export from project history.
 
-Completed builds appear in **Generated Projects** and remain available after a
-server restart as long as their ZIP files remain in `output/`.
+> [!WARNING]
+> Only analyze or rebuild websites you own or have explicit permission to copy.
+> You are responsible for copyright, trademark, privacy, and terms-of-service compliance.
 
-The standardized storage layout now uses:
+---
 
-- `storage/projects/` for persisted project folders and the project index
-- `storage/reports/` for report JSON files
-- `storage/cache/` for temporary export/rebuild workspaces
-- `storage/exports/` for export copies
+## 🔌 API Reference
 
-## API
+All endpoints are served from the same Express application. JSON request bodies are
+limited to 32 KB, and API failures return structured HTTP errors.
 
-### `POST /api/rebuild`
+| Method | Endpoint | Purpose |
+| :---: | :--- | :--- |
+| `POST` | `/api/analyze` | Analyze a URL without generating a project. |
+| `POST` | `/api/rebuild` | Analyze, rebuild, report, persist, and package a project. |
+| `POST` | `/api/migrate` | Run a rebuild with framework migration mode enabled. |
+| `GET` | `/api/projects` | List up to 100 stored projects, newest first. |
+| `GET` | `/api/project/:projectId` | Return project metadata, report, and current file list. |
+| `GET` | `/api/project/:projectId/files` | List the editable files in a stored project. |
+| `GET` | `/api/project/:projectId/file?path=...` | Read one UTF-8 project file. |
+| `POST` | `/api/project/:projectId/file` | Save one UTF-8 project file. |
+| `GET` | `/api/project/:projectId/inspector` | Return project, component, asset, and ZIP statistics. |
+| `GET` | `/api/report/:projectId` | Return a persisted website report. |
+| `POST` | `/api/export` | Package a stored project with a selected export preset. |
+| `POST` | `/api/chat` | Return a project-aware rule-based change suggestion. |
+| `GET` | `/api/download/:zipName` | Download a generated project archive. |
 
-Example request:
+Accepted rebuild modes are `mirror`, `ai-rebuild`, `ai-upgrade`, and
+`framework-migration`. Accepted project targets are `static-html`, `php`,
+`laravel`, `wordpress`, `nextjs`, `nuxt`, `react`, `vue`, `aspnet`, `express`,
+and `node`.
 
-```json
-{
-  "url": "https://example.com",
-  "projectName": "Example Project",
-  "outputType": "static-html",
-  "rebuildMode": "ai-upgrade",
-  "aiRebuildMode": true,
-  "options": {
-    "downloadImages": true,
-    "downloadVideos": true,
-    "downloadFonts": true,
-    "rewriteCss": true,
-    "optimizeImages": false,
-    "mobileResponsive": true,
-    "seoOptimize": true,
-    "generateComponents": false,
-    "aiCleanCode": false,
-    "splitComponents": true,
-    "removeDuplicateCss": true,
-    "renameClasses": true,
-    "improveAccessibility": true,
-    "generateReadme": true,
-    "generateHtaccess": false,
-    "generateSitemap": false,
-    "generateRobots": false
-  }
-}
-```
+Accepted export formats are `zip`, `git`, `docker`, `plesk`, `cpanel`, and `ftp`.
+See [API Design](docs/04-api-design.md) for the compatibility principles behind
+the route contracts.
 
-Valid output types are `static-html`, `php`, `laravel`, `wordpress`, `nextjs`,
-`nuxt`, `react`, `vue`, `express`, `node`, and `aspnet`.
+---
 
-`aiRebuildMode` is optional and defaults to `false`, preserving Mirror Mode.
-`rebuildMode` accepts `mirror`, `ai-rebuild`, `framework-migration`, or
-`ai-upgrade`. The legacy `aiRebuildMode` boolean remains supported.
+## 📚 Documentation
 
-`exportFormat` accepts `zip`, `git`, `docker`, `plesk`, `cpanel`, or `ftp`.
-The selected preset is stored with the project record and influences the
-generated bundle contents.
+| # | Guide | Focus |
+| :---: | :--- | :--- |
+| 00 | [Product Vision](docs/00-product-vision.md) | Product problem, audience, value, scope, and guiding principles. |
+| 01 | [Roadmap](docs/01-roadmap.md) | Long-range engine, AI, migration, and SaaS direction. |
+| 02 | [System Architecture](docs/02-system-architecture.md) | Main subsystems, runtime split, data flow, and design rules. |
+| 03 | [Folder Structure](docs/03-folder-structure.md) | Target repository layout and module responsibilities. |
+| 04 | [API Design](docs/04-api-design.md) | Endpoint contracts, payload concepts, and compatibility rules. |
+| 05 | [Database Design](docs/05-database-design.md) | Logical entities, storage strategy, and recommended schema. |
+| 06 | [Engine Design](docs/06-engine-design.md) | Engine stages, module boundaries, and extension principles. |
+| 07 | [AI Engine](docs/07-ai-engine.md) | Provider abstraction, current mode, and integration responsibilities. |
+| 08 | [Plugin System](docs/08-plugin-system.md) | Plugin contracts, hooks, goals, types, and governance. |
+| 09 | [Deployment Strategy](docs/09-deployment-strategy.md) | Local and production deployment direction. |
+| 10 | [Security](docs/10-security.md) | Threat model, defensive rules, and data-handling expectations. |
+| 11 | [Testing Strategy](docs/11-testing-strategy.md) | Test layers, regression targets, and automation guidance. |
+| 12 | [Coding Standards](docs/12-coding-standards.md) | JavaScript, product, and documentation conventions. |
+| 13 | [Sprint Plan](docs/13-sprint-plan.md) | Sprint sequencing, deliverables, and execution rules. |
+| 14 | [Architecture Diagrams](docs/14-architecture-diagrams.md) | Mermaid views of system, API, storage, AI, and export flows. |
+| 15 | [Decision Log](docs/15-decision-log.md) | Architecture decision records and their consequences. |
 
-### `POST /api/analyze`
+Project-level context is also available in the [Changelog](CHANGELOG.md) and
+[engineering task list](TODO.md).
 
-Accepts `{ "url": "https://example.com" }` and returns detected technologies,
-confidence-scored components, normalized routes, categorized assets, scores, and
-a complete website report without generating a project.
+---
 
-### `GET /api/projects`
-
-Returns up to 100 recently generated project records, newest first.
-
-### `GET /api/download/:zipName`
-
-Downloads a generated project ZIP.
-
-### `GET /api/report/:projectId`
-
-Returns the persisted JSON website report for a generated project.
-
-### `GET /api/project/:projectId/inspector`
-
-Returns generated project size, file count, pages generated, components
-generated, assets downloaded, and ZIP size.
-
-### `GET /api/project/:projectId`
-
-Returns project metadata, the stored report, and the current file list from the
-editable project storage.
-
-### `GET /api/project/:projectId/files`
-
-Returns the editable file list for the project.
-
-### `GET /api/project/:projectId/file`
-
-Accepts `?path=...` and returns the file contents.
-
-### `POST /api/project/:projectId/file`
-
-Accepts `{ "path": "file.txt", "content": "..." }` and saves the file.
-
-### `POST /api/migrate`
-
-Shortcut for framework-migration rebuilds.
-
-### `POST /api/export`
-
-Accepts `{ "projectId": "...", "exportFormat": "docker" }` and creates a new
-export archive from the stored project.
-
-### `POST /api/chat`
-
-Accepts `{ "projectId": "...", "message": "..." }` and returns a rule-based
-change suggestion. Provider placeholders are present for future OpenAI, Claude,
-Gemini, Ollama, and OpenRouter integration.
-
-## Storage
-
-- ZIP files: `output/`
-- Project metadata: `backend/output/projects.json`
-- Project reports: `backend/output/reports/<projectId>.json`
-- Editable project storage: `storage/projects/<projectId>/`
-- Report mirrors: `storage/reports/<projectId>.json`
-- Temporary cache: `storage/cache/`
-- Export mirrors: `storage/exports/`
-
-Every new project ZIP also includes `report.json`, `REPORT.md`, and the legacy
-`website-report.json` compatibility file.
-
-Temporary generation directories are removed after each ZIP is created.
-
-## Project structure
+## 🗂️ Project Structure
 
 ```text
-frontend/
-  index.html
-  style.css
-  app.js
-backend/
-  api/
-    index.js
-    routes.js
-  analyzer/
-    index.js
-  ai/
-    index.js
-    chat.js
-    providers.js
-  builders/
-    index.js
-  collectors/
-    index.js
-  crawler/
-    index.js
-  detectors/
-    index.js
-  exporters/
-    index.js
-  migrations/
-    index.js
-  reports/
-    generator.js
-    index.js
-  utils/
-    index.js
-  engine/
-    index.js
-  server.js
-  analyzer.js
-  asset-analyzer.js
-  asset-collector.js
-  cleaner.js
-  component-builder.js
-  component-detector.js
-  crawler.js
-  downloader.js
-  export-manager.js
-  project-generator.js
-  rebuilder.js
-  reporter.js
-  route-detector.js
-  generators/
-    static-html.js
-    php.js
-    nextjs.js
-    scaffolds.js
-  output/
-    projects.json
-    reports/
-  zipper.js
-output/
-package.json
-README.md
+website-rebuilder-ai/
+├── backend/
+│   ├── ai/                    # Provider registry and project-aware chat
+│   ├── api/                   # Express route registration
+│   ├── engine/                # Unified backend engine
+│   ├── generators/            # Static, PHP, Next.js, and scaffold generators
+│   ├── reports/               # Report generation entrypoints
+│   ├── storage/               # Persistent storage interface
+│   ├── analyzer.js            # DOM, technology, and quality analysis
+│   ├── asset-collector.js     # Downloading and path rewriting
+│   ├── cleaner.js             # HTML, CSS, and JavaScript cleanup
+│   ├── component-detector.js  # Semantic section recognition
+│   ├── crawler.js             # Bounded same-domain crawler
+│   ├── export-manager.js      # Deployment/export preset files
+│   ├── project-generator.js   # Multi-target project generation
+│   ├── rebuilder.js           # Rebuild and upgrade transformations
+│   ├── reporter.js            # Scores, reports, and project statistics
+│   └── server.js              # Application entrypoint
+├── docs/                      # Product and engineering documentation
+├── engine/
+│   ├── accessibility/         # Accessibility engine
+│   ├── component-extractor/   # Component extraction engine
+│   └── seo/                   # SEO engine
+├── frontend/
+│   ├── app.js                 # Dashboard behavior
+│   ├── index.html             # Application shell
+│   └── style.css              # Dashboard design system
+├── scripts/
+│   └── verify-endpoints.js    # Running-server API verification
+├── storage/
+│   ├── cache/                 # Temporary rebuild/export workspaces
+│   ├── exports/               # Persisted export mirrors
+│   ├── projects/              # Editable generated projects
+│   └── reports/               # Persisted analysis reports
+├── tests/
+│   ├── fixtures/              # Representative HTML test inputs
+│   ├── analyzer.test.js       # Analyzer assertions
+│   ├── generator.test.js      # Generator assertions
+│   └── run-tests.js           # Test suite entrypoint
+├── output/                    # Downloadable ZIP archives
+├── CHANGELOG.md
+├── package.json
+└── README.md
 ```
 
-## Limitations and responsible use
+---
 
-- Only rebuild websites you own or have permission to copy.
-- The server captures returned HTML; content created later by browser JavaScript
-  may not be included.
-- Authentication, APIs, databases, form handlers, and original server-side
-  behavior are not reproduced.
-- Remote servers may reject asset requests. Unavailable assets retain their
-  original URL.
-- Optimize Images is recorded as a project preference for a future image-codec
-  stage. AI Rebuild Mode provides rule-based components and code cleanup without
-  calling an external AI service.
+## 🗺️ Roadmap
+
+The milestones below describe the path to a stable public `v1.0`. Scope may move
+between milestones as reliability data and contributor feedback improve.
+
+### v0.5 — Analysis Foundation
+
+- [ ] Expand technology signatures and confidence scoring.
+- [ ] Add richer route, asset, and component relationship views.
+- [ ] Strengthen analyzer fixtures and regression coverage.
+
+### v0.6 — Reconstruction Quality
+
+- [ ] Improve component boundary detection and naming.
+- [ ] Increase visual fidelity across multi-page static and PHP builds.
+- [ ] Add deterministic rebuild snapshots for quality comparison.
+
+### v0.7 — Framework Depth
+
+- [ ] Deepen React, Next.js, Vue, Laravel, and WordPress generation.
+- [ ] Add target-specific linting and build validation.
+- [ ] Produce clearer migration notes for unsupported behavior.
+
+### v0.8 — AI Provider Runtime
+
+- [ ] Connect the provider abstraction to opt-in refactoring workflows.
+- [ ] Add provider configuration, timeouts, budgets, and safe fallbacks.
+- [ ] Preserve deterministic local mode for offline operation.
+
+### v0.9 — Production Hardening
+
+- [ ] Add queued jobs, cancellation, progress events, and recovery.
+- [ ] Harden URL fetching, storage boundaries, and archive validation.
+- [ ] Add CI matrices, end-to-end tests, and deployment recipes.
+
+### v1.0 — Stable Rebuilder Platform
+
+- [ ] Publish stable API and project-format contracts.
+- [ ] Deliver validated generation paths and reproducible exports.
+- [ ] Complete security review, migration guide, and release documentation.
+
+Track active implementation work in [TODO.md](TODO.md) and release history in
+[CHANGELOG.md](CHANGELOG.md).
+
+---
+
+## ❓ FAQ
+
+<details>
+<summary><strong>1. Can it recover server-side PHP or other backend source?</strong></summary>
+
+No. Public web responses contain rendered HTML and assets, not private PHP,
+controllers, database queries, credentials, or server configuration. The PHP output
+is a new reconstruction based on observable behavior and structure.
+</details>
+
+<details>
+<summary><strong>2. Can it rebuild a React or Next.js website?</strong></summary>
+
+It can analyze the HTML returned by a public React or Next.js site and generate a new
+React or Next.js-oriented scaffold. It does not recover the site's original source
+components, state model, build configuration, or private APIs.
+</details>
+
+<details>
+<summary><strong>3. Can it clone private or authenticated websites?</strong></summary>
+
+No authenticated browser session or login automation is implemented. Analyze only
+publicly reachable pages that you are authorized to reproduce.
+</details>
+
+<details>
+<summary><strong>4. Does it support WordPress?</strong></summary>
+
+Yes. The detector recognizes common WordPress signals, and `wordpress` is an
+implemented generation target. The result is a reconstructed theme structure, not a
+copy of the source site's database, plugins, admin settings, or proprietary theme.
+</details>
+
+<details>
+<summary><strong>5. Does AI Rebuild Mode require an API key?</strong></summary>
+
+No. Current rebuild and chat behavior is deterministic and rule-based. Provider
+adapters are architectural extension points and are not required for local use.
+</details>
+
+<details>
+<summary><strong>6. Will JavaScript-rendered content be captured?</strong></summary>
+
+Not always. The crawler processes returned HTTP HTML and does not currently execute a
+full browser runtime. Content inserted only after client-side execution may be absent.
+</details>
+
+<details>
+<summary><strong>7. How many pages can one analysis crawl?</strong></summary>
+
+The crawler is intentionally bounded to 25 same-domain pages. It checks robots and
+sitemap hints, normalizes internal links, and records failed pages.
+</details>
+
+<details>
+<summary><strong>8. Are images, fonts, videos, and styles downloaded?</strong></summary>
+
+They can be, according to the selected asset options. Reachable assets are organized
+locally and paths are rewritten; blocked or unavailable assets retain their remote URL.
+</details>
+
+<details>
+<summary><strong>9. Is the generated project production-ready?</strong></summary>
+
+It is developer-ready: structured, editable, report-backed, and suitable as a strong
+starting point. You should still review security, licensing, functionality,
+accessibility, performance, forms, APIs, and deployment settings before production.
+</details>
+
+<details>
+<summary><strong>10. Can it reproduce forms, payments, or databases?</strong></summary>
+
+It can detect and reconstruct visible form markup, but it cannot infer private
+handlers, payment secrets, data models, or database behavior. Those integrations must
+be implemented and tested separately.
+</details>
+
+<details>
+<summary><strong>11. What is the difference between a target and an export?</strong></summary>
+
+A target such as Next.js or Laravel determines the generated project structure. An
+export such as ZIP or Docker determines how the stored project is packaged and
+delivered.
+</details>
+
+<details>
+<summary><strong>12. Where are projects and reports stored?</strong></summary>
+
+Editable projects live in `storage/projects`, report mirrors in `storage/reports`,
+export mirrors in `storage/exports`, temporary workspaces in `storage/cache`, and
+downloadable archives in `output`.
+</details>
+
+---
+
+## 🤝 Contributing
+
+Contributions should improve reconstruction accuracy without overstating what can be
+recovered from a public website.
+
+Before participating, read the [contribution guide](CONTRIBUTING.md),
+[security policy](SECURITY.md), and [Code of Conduct](CODE_OF_CONDUCT.md). Use the
+[GitHub issue templates](https://github.com/one1of1one/website-rebuilder-ai/issues/new/choose)
+for reproducible bug reports, focused feature proposals, and project questions.
+
+1. Search [existing issues](https://github.com/one1of1one/website-rebuilder-ai/issues)
+   before proposing overlapping work.
+2. Open an issue for substantial behavior or architecture changes.
+3. Fork the repository and create a focused branch from the current default branch.
+4. Follow the [coding standards](docs/12-coding-standards.md) and preserve public API
+   compatibility.
+5. Add or update fixtures and tests for analyzer or generator behavior.
+6. Run the relevant checks:
+
+   ```bash
+   npm test
+   npm run verify:endpoints
+   ```
+
+7. Update documentation when behavior, contracts, outputs, or limitations change.
+8. Submit a pull request explaining the problem, approach, validation, and tradeoffs.
+
+Keep pull requests narrow, avoid unrelated formatting churn, and never commit generated
+projects, credentials, private website content, or copyrighted assets without permission.
+
+For security-sensitive findings, avoid publishing exploit details until maintainers have
+had a reasonable opportunity to assess and address the report.
+
+---
+
+## ⚖️ License
+
+Website Rebuilder AI is distributed under the **MIT License**.
+
+The license covers this project's source code, not third-party websites or assets
+processed with it. You must have the legal right to analyze, copy, modify, and distribute
+any external content included in a generated project.
+
+---
+
+<div align="center">
+
+**Website Rebuilder AI**
+
+Analyze. Reverse Engineer. Rebuild.
+
+[Report a Bug](https://github.com/one1of1one/website-rebuilder-ai/issues/new?template=bug_report.md) ·
+[Request a Feature](https://github.com/one1of1one/website-rebuilder-ai/issues/new?template=feature_request.md) ·
+[Read the Docs](docs/00-product-vision.md)
+
+</div>

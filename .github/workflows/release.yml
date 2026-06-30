@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test release
+        run: npm test
+
+      - name: Build release archive
+        run: |
+          mkdir -p dist
+          git archive \
+            --format=zip \
+            --prefix="website-rebuilder-ai-${GITHUB_REF_NAME}/" \
+            --output="dist/website-rebuilder-ai-${GITHUB_REF_NAME}.zip" \
+            "$GITHUB_SHA"
+
+      - name: Store workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: website-rebuilder-ai-${{ github.ref_name }}
+          path: dist/website-rebuilder-ai-${{ github.ref_name }}.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "dist/website-rebuilder-ai-${GITHUB_REF_NAME}.zip" \
+            --verify-tag \
+            --generate-notes \
+            --title "Website Rebuilder AI ${GITHUB_REF_NAME}"
