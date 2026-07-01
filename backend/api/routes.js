@@ -388,6 +388,7 @@ async function performRebuild(requestBody) {
       componentMap: rebuildResult.componentMap || [],
       generatedFiles: rebuildResult.generatedFiles || [],
       ...inspectorData,
+      intelligence: rebuildResult.intelligence,
       estimatedSimilarity:
         mode === "mirror"
           ? 98
@@ -454,6 +455,7 @@ async function performRebuild(requestBody) {
     exportLabel: exportPreset.label,
     componentMap: rebuildResult.componentMap || [],
     generatedFiles: rebuildResult.generatedFiles || [],
+    intelligence: rebuildResult.intelligence,
   };
 
   await addProject(project);

@@ -63,6 +63,13 @@ async function runGeneration({
       "component-graph.json",
       "semantic-map.json",
       "framework-map.json",
+      "INTELLIGENCE.md",
+      "interactions.json",
+      "interaction-map.json",
+      "state-map.json",
+      "STATE_INFERENCE.md",
+      "route-intelligence.json",
+      "ROUTING.md",
     ]) {
       assert(
         await fs.pathExists(path.join(tempRoot, reportFile)),
@@ -88,6 +95,8 @@ async function runGeneration({
     assert(result.generatedFiles.length > 0, `${outputType}/${mode}: generatedFiles empty`);
     assert(result.reconstruction.domGraph.nodeCount > 0, `${outputType}/${mode}: DOM graph empty`);
     assert(result.reconstruction.componentGraph.nodes.length > 0, `${outputType}/${mode}: component graph empty`);
+    assert(result.intelligence.page.type, `${outputType}/${mode}: page classification missing`);
+    assert(result.reconstruction.intelligence, `${outputType}/${mode}: reconstruction intelligence missing`);
     return { tempRoot, result };
   } finally {
     await fs.remove(tempRoot);

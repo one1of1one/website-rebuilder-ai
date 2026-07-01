@@ -22,6 +22,12 @@ const {
   convertHtmlToJsx,
   convertHtmlToVueTemplate,
 } = require("./conversion");
+const {
+  analyzeIntelligence,
+  intelligenceMarkdown,
+  routingMarkdown,
+  stateInferenceMarkdown,
+} = require("./intelligence");
 
 function slug(value, fallback = "page") {
   return (
@@ -1341,6 +1347,12 @@ async function generateProjectV1({
   options = {},
   exportFormat = "zip",
 }) {
+  const intelligenceModel = analyzeIntelligence({
+    pages,
+    sourceUrl,
+    outputType,
+    components: detectedComponents,
+  });
   const reconstructionModel =
     reconstruction ||
     reconstructWebsite({
@@ -1348,7 +1360,9 @@ async function generateProjectV1({
       assets,
       sourceUrl,
       outputType,
+      components: intelligenceModel.components,
     });
+  reconstructionModel.intelligence = intelligenceModel;
   const reconstructedComponents = reconstructionModel.componentGraph.nodes.map(
     ({ name, type, confidence, count }) => ({ name, type, confidence, count }),
   );
@@ -1382,6 +1396,16 @@ async function generateProjectV1({
       ...component,
       target: generatedComponentFiles.get(component.name) || component.target,
     }));
+  const stateFramework =
+    { nextjs: "react", wordpress: "php" }[outputType] || outputType;
+  reconstructionModel.frameworkMap.intelligence = {
+    pageType: intelligenceModel.page.type,
+    businessIntent: intelligenceModel.business.intent,
+    semanticConfidence: intelligenceModel.semanticConfidence.score,
+    stateHints:
+      intelligenceModel.state.frameworkHints[stateFramework] || [],
+    routeHints: intelligenceModel.routing.frameworkHints[outputType] || null,
+  };
   await Promise.all([
     fs.writeFile(
       path.join(stagingDirectory, "RECONSTRUCTION.md"),
@@ -1406,6 +1430,38 @@ async function generateProjectV1({
       path.join(stagingDirectory, "framework-map.json"),
       reconstructionModel.frameworkMap,
       { spaces: 2 },
+    ),
+    fs.writeFile(
+      path.join(stagingDirectory, "INTELLIGENCE.md"),
+      intelligenceMarkdown(intelligenceModel),
+    ),
+    fs.writeJson(
+      path.join(stagingDirectory, "interactions.json"),
+      { interactions: intelligenceModel.interactions },
+      { spaces: 2 },
+    ),
+    fs.writeJson(
+      path.join(stagingDirectory, "interaction-map.json"),
+      intelligenceModel.interactionMap,
+      { spaces: 2 },
+    ),
+    fs.writeJson(
+      path.join(stagingDirectory, "state-map.json"),
+      intelligenceModel.state,
+      { spaces: 2 },
+    ),
+    fs.writeFile(
+      path.join(stagingDirectory, "STATE_INFERENCE.md"),
+      stateInferenceMarkdown(intelligenceModel.state),
+    ),
+    fs.writeJson(
+      path.join(stagingDirectory, "route-intelligence.json"),
+      intelligenceModel.routing,
+      { spaces: 2 },
+    ),
+    fs.writeFile(
+      path.join(stagingDirectory, "ROUTING.md"),
+      routingMarkdown(intelligenceModel.routing),
     ),
   ]);
   const support = supportFileContents(generated.pages, sourceUrl);
@@ -1475,6 +1531,7 @@ async function generateProjectV1({
     componentMap: generated.componentMap || [],
     generatedFiles: generated.generatedFiles || [],
     reconstruction: reconstructionModel,
+    intelligence: intelligenceModel,
     outputStructure: await listProjectFiles(stagingDirectory),
   };
 }

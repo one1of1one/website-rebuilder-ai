@@ -224,16 +224,17 @@ function reconstructWebsite({
   assets = {},
   sourceUrl,
   outputType = "static-html",
+  components,
 }) {
   const primaryHtml = pages[0]?.html || "";
-  const components = detectComponents(primaryHtml);
+  const detectedComponents = components || detectComponents(primaryHtml);
   const domGraph = buildDomGraph(primaryHtml);
   const semanticMap = buildSemanticSectionMap(primaryHtml);
-  const componentGraph = buildComponentGraph(primaryHtml, components);
+  const componentGraph = buildComponentGraph(primaryHtml, detectedComponents);
   const routePageMap = buildRoutePageMap(pages, sourceUrl);
   const assetComponentRelationships = buildAssetComponentMap(
     primaryHtml,
-    components,
+    detectedComponents,
     assets,
     sourceUrl,
   );

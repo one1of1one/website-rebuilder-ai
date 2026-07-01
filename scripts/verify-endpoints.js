@@ -92,6 +92,8 @@ async function main() {
 
   const report = await requestJsonWithFallback(`/api/report/${projectId}`);
   assert(report.response.ok, "/api/report/:id failed");
+  assert(report.data.intelligencePageType, "/api/report/:id intelligence missing");
+  assert(report.data.businessIntent, "/api/report/:id business intent missing");
   checks.push({ endpoint: "GET /api/report/:id", status: report.response.status });
 
   const inspector = await requestJsonWithFallback(`/api/project/${projectId}/inspector`);
@@ -111,6 +113,20 @@ async function main() {
   const files = await requestJsonWithFallback(`/api/project/${projectId}/files`);
   assert(files.response.ok, "/api/project/:id/files failed");
   assert(Array.isArray(files.data.files), "/api/project/:id/files did not return files[]");
+  for (const intelligenceFile of [
+    "INTELLIGENCE.md",
+    "interactions.json",
+    "interaction-map.json",
+    "state-map.json",
+    "STATE_INFERENCE.md",
+    "route-intelligence.json",
+    "ROUTING.md",
+  ]) {
+    assert(
+      files.data.files.includes(intelligenceFile),
+      `/api/project/:id/files missing ${intelligenceFile}`,
+    );
+  }
   checks.push({ endpoint: "GET /api/project/:id/files", status: files.response.status });
 
   const filePath = files.data.files.find((entry) => entry.endsWith("index.html")) || files.data.files[0];

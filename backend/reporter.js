@@ -105,6 +105,7 @@ function generateWebsiteReport({
     assets: [],
     unmappedAssets: [],
   };
+  const intelligence = inspector.intelligence || null;
 
   return {
     projectId: project.id || null,
@@ -137,6 +138,10 @@ function generateWebsiteReport({
     componentTree,
     domSummary,
     assetComponentMap,
+    intelligence,
+    intelligencePageType: intelligence?.page?.type || null,
+    businessIntent: intelligence?.business?.intent || null,
+    semanticConfidence: intelligence?.semanticConfidence?.score || 0,
     detectedRoutes,
     layoutType: layoutDetails.pageType || "corporate",
     layoutPattern: layoutDetails.layoutPattern || "single-column",
@@ -185,6 +190,7 @@ function generateWebsiteReport({
       componentTree,
       domSummary,
       assetComponentMap,
+      intelligence,
     },
   };
 }
@@ -237,6 +243,15 @@ function generateReportMarkdown(report) {
 - Blocking CSS: ${report.performanceDetails?.blockingCssCount ?? 0}
 - Blocking JS: ${report.performanceDetails?.blockingJsCount ?? 0}
 - Large HTML estimate: ${report.performanceDetails?.largeHtmlEstimate || "unknown"}
+
+## Semantic intelligence
+
+- Page type: ${report.intelligencePageType || "Not classified"}
+- Business intent: ${report.businessIntent || "Not classified"}
+- Semantic confidence: ${report.semanticConfidence || 0}/100
+- Interactions detected: ${report.intelligence?.interactions?.length || 0}
+- State requirements inferred: ${report.intelligence?.state?.states?.length || 0}
+- Intelligent routes inferred: ${report.intelligence?.routing?.routeCount || 0}
 
 ## Output structure
 
